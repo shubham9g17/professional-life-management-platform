@@ -1,0 +1,243 @@
+# Alert Configuration
+# This file defines alert rules for monitoring the Professional Life Management Platform
+
+alerts:
+  # Critical Alerts - Immediate Response Required
+  critical:
+    - name: database_connection_failure
+      description: Database connection has failed
+      condition: health.checks.database.status == "unhealthy"
+      severity: critical
+      channels:
+        - email
+        - sms
+        - pagerduty
+      
+    - name: application_crash
+      description: Application has crashed or is unresponsive
+      condition: uptime_check_failed for 2 minutes
+      severity: critical
+      channels:
+        - email
+        - sms
+        - pagerduty
+    
+    - name: authentication_system_failure
+      description: Authentication system is not working
+      condition: auth_error_rate > 50%
+      severity: critical
+      channels:
+        - email
+        - sms
+        - pagerduty
+    
+    - name: data_corruption_detected
+      description: Data integrity check failed
+      condition: data_integrity_check == false
+      severity: critical
+      channels:
+        - email
+        - sms
+        - pagerduty
+
+  # High Priority Alerts - 15 Minute Response
+  high:
+    - name: high_error_rate
+      description: API error rate is above threshold
+      condition: error_rate > 5%
+      severity: high
+      channels:
+        - email
+        - slack
+      
+    - name: slow_response_time
+      description: API response time is too slow
+      condition: response_time_p95 > 2000ms
+      severity: high
+      channels:
+        - email
+        - slack
+    
+    - name: high_memory_usage
+      description: Memory usage is critically high
+      condition: memory_usage > 90%
+      severity: high
+      channels:
+        - email
+        - slack
+    
+    - name: high_cpu_usage
+      description: CPU usage is critically high
+      condition: cpu_usage > 90%
+      severity: high
+      channels:
+        - email
+        - slack
+    
+    - name: disk_space_low
+      description: Disk space is running low
+      condition: disk_usage > 90%
+      severity: high
+      channels:
+        - email
+        - slack
+
+  # Medium Priority Alerts - 1 Hour Response
+  medium:
+    - name: elevated_error_rate
+      description: API error rate is elevated
+      condition: error_rate > 2%
+      severity: medium
+      channels:
+        - email
+        - slack
+      
+    - name: degraded_performance
+      description: API performance is degraded
+      condition: response_time_p95 > 1000ms
+      severity: medium
+      channels:
+        - email
+        - slack
+    
+    - name: low_cache_hit_rate
+      description: Cache hit rate is below optimal
+      condition: cache_hit_rate < 70%
+      severity: medium
+      channels:
+        - slack
+    
+    - name: cron_job_failure
+      description: Scheduled cron job has failed
+      condition: cron_job_status == "failed"
+      severity: medium
+      channels:
+        - email
+        - slack
+    
+    - name: redis_degraded
+      description: Redis cache is degraded or unavailable
+      condition: health.checks.redis.status == "degraded"
+      severity: medium
+      channels:
+        - slack
+
+  # Low Priority Alerts - Daily Review
+  low:
+    - name: slow_queries
+      description: Database queries are slower than optimal
+      condition: query_time_p95 > 500ms
+      severity: low
+      channels:
+        - slack
+      
+    - name: high_redis_memory
+      description: Redis memory usage is high
+      condition: redis_memory_usage > 80%
+      severity: low
+      channels:
+        - slack
+    
+    - name: unusual_traffic_pattern
+      description: Traffic pattern is unusual
+      condition: request_rate > 2x_average
+      severity: low
+      channels:
+        - slack
+
+# Alert Channels Configuration
+channels:
+  email:
+    type: email
+    recipients:
+      - ops@your-domain.com
+      - dev@your-domain.com
+    
+  sms:
+    type: sms
+    recipients:
+      - "+1234567890"
+    
+  slack:
+    type: slack
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#alerts"
+    
+  pagerduty:
+    type: pagerduty
+    integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+
+# Alert Throttling
+throttling:
+  # Don't send the same alert more than once per time window
+  duplicate_window: 15m
+  
+  # Group similar alerts together
+  grouping:
+    enabled: true
+    window: 5m
+  
+  # Quiet hours (no low/medium priority alerts)
+  quiet_hours:
+    enabled: true
+    start: "22:00"
+    end: "08:00"
+    timezone: "America/New_York"
+    exclude_severities:
+      - critical
+      - high
+
+# Alert Escalation
+escalation:
+  # If alert is not acknowledged within time, escalate
+  critical:
+    initial_notification: 0m
+    escalation_1: 5m
+    escalation_2: 15m
+    
+  high:
+    initial_notification: 0m
+    escalation_1: 15m
+    escalation_2: 30m
+    
+  medium:
+    initial_notification: 0m
+    escalation_1: 1h
+    
+  low:
+    initial_notification: 0m
+
+# On-Call Schedule
+on_call:
+  rotation:
+    - name: "Primary"
+      schedule:
+        - days: ["Monday", "Tuesday", "Wednesday"]
+          person: "engineer1@your-domain.com"
+        - days: ["Thursday", "Friday"]
+          person: "engineer2@your-domain.com"
+        - days: ["Saturday", "Sunday"]
+          person: "engineer3@your-domain.com"
+    
+    - name: "Secondary"
+      schedule:
+        - days: ["Monday", "Tuesday", "Wednesday"]
+          person: "engineer2@your-domain.com"
+        - days: ["Thursday", "Friday"]
+          person: "engineer3@your-domain.com"
+        - days: ["Saturday", "Sunday"]
+          person: "engineer1@your-domain.com"
+
+# Maintenance Windows
+maintenance_windows:
+  # Suppress alerts during maintenance
+  - name: "Weekly Maintenance"
+    schedule: "Sunday 02:00-04:00"
+    suppress_severities:
+      - low
+      - medium
+  
+  - name: "Database Backup"
+    schedule: "Daily 03:00-03:30"
+    suppress_severities:
+      - low

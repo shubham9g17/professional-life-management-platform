@@ -1,0 +1,445 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER MODEL
+// ============================================================================
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Preferences
+  theme                      String  @default("AUTO") // LIGHT, DARK, AUTO
+  timezone                   String  @default("UTC")
+  
+  // Notification Preferences
+  taskReminders              Boolean @default(true)
+  habitNudges                Boolean @default(true)
+  achievementNotifications   Boolean @default(true)
+  budgetAlerts               Boolean @default(true)
+  quietHoursStart            String? // HH:mm format
+  quietHoursEnd              String? // HH:mm format
+  notificationFrequency      String  @default("REALTIME") // REALTIME, HOURLY, DAILY
+
+  // Metrics
+  productivityScore Float @default(0)
+  wellnessScore     Float @default(0)
+  growthScore       Float @default(0)
+  overallScore      Float @default(0)
+
+  // Relations
+  tasks                Task[]
+  habits               Habit[]
+  transactions         Transaction[]
+  budgets              Budget[]
+  exercises            Exercise[]
+  healthMetrics        HealthMetric[]
+  fitnessGoals         FitnessGoal[]
+  meals                Meal[]
+  waterIntakes         WaterIntake[]
+  learningResources    LearningResource[]
+  dailyMetrics         DailyMetrics[]
+  achievements         Achievement[]
+  notifications        Notification[]
+  syncQueue            SyncQueue[]
+  conflictResolutions  ConflictResolution[]
+  integrations         Integration[]
+
+  @@index([email])
+}
+
+// ============================================================================
+// TASK MANAGEMENT MODELS
+// ============================================================================
+
+model Task {
+  id              String    @id @default(cuid())
+  userId          String
+  title           String
+  description     String?
+  workspace       String    // PROFESSIONAL, PERSONAL, LEARNING
+  priority        String    // LOW, MEDIUM, HIGH, URGENT
+  status          String    // TODO, IN_PROGRESS, COMPLETED, ARCHIVED
+  dueDate         DateTime?
+  estimatedEffort Int?      // minutes
+  completedAt     DateTime?
+  tags            String    @default("[]") // JSON array of tags
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([workspace])
+  @@index([dueDate])
+  @@index([userId, status])
+  @@index([userId, workspace])
+  @@index([userId, status, dueDate])
+  @@index([userId, workspace, status])
+  @@index([userId, dueDate])
+}
+
+// ============================================================================
+// HABIT TRACKING MODELS
+// ============================================================================
+
+model Habit {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  category        String   // PROFESSIONAL_DEVELOPMENT, HEALTH, PRODUCTIVITY, PERSONAL_GROWTH
+  frequency       String   // DAILY, WEEKLY, CUSTOM
+  currentStreak   Int      @default(0)
+  longestStreak   Int      @default(0)
+  completionRate  Float    @default(0)
+  lastCompletedAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions HabitCompletion[]
+
+  @@index([userId])
+  @@index([category])
+  @@index([userId, category])
+}
+
+model HabitCompletion {
+  id          String   @id @default(cuid())
+  habitId     String
+  completedAt DateTime @default(now())
+  notes       String?
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@index([habitId])
+  @@index([completedAt])
+  @@index([habitId, completedAt])
+}
+
+// ============================================================================
+// FINANCIAL TRACKING MODELS
+// ============================================================================
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  type        String   // INCOME, EXPENSE
+  category    String
+  subcategory String?
+  description String
+  date        DateTime
+  tags        String    @default("[]") // JSON array of tags
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([category])
+  @@index([date])
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([userId, category])
+  @@index([userId, type, date])
+  @@index([userId, category, date])
+}
+
+model Budget {
+  id             String   @id @default(cuid())
+  userId         String
+  category       String
+  monthlyLimit   Float
+  alertThreshold Float    // percentage (0-100)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+  @@index([userId])
+  @@index([category])
+}
+
+// ============================================================================
+// FITNESS TRACKING MODELS
+// ============================================================================
+
+model Exercise {
+  id             String   @id @default(cuid())
+  userId         String
+  activityType   String
+  duration       Int      // minutes
+  intensity      String   // LOW, MODERATE, HIGH, INTENSE
+  caloriesBurned Int?
+  notes          String?
+  date           DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@index([activityType])
+  @@index([userId, date])
+}
+
+model HealthMetric {
+  id           String   @id @default(cuid())
+  userId       String
+  date         DateTime
+  weight       Float?
+  sleepQuality Int?     // 1-10
+  stressLevel  Int?     // 1-10
+  energyLevel  Int?     // 1-10
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+  @@index([userId, date])
+}
+
+model FitnessGoal {
+  id          String    @id @default(cuid())
+  userId      String
+  goalType    String    // WEIGHT_LOSS, WEIGHT_GAIN, EXERCISE_MINUTES, STRENGTH, ENDURANCE, CUSTOM
+  targetValue Float
+  currentValue Float    @default(0)
+  unit        String    // kg, lbs, minutes, reps, etc.
+  deadline    DateTime?
+  status      String    @default("ACTIVE") // ACTIVE, COMPLETED, ABANDONED
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([userId, status])
+}
+
+// ============================================================================
+// NUTRITION MODELS
+// ============================================================================
+
+model Meal {
+  id        String   @id @default(cuid())
+  userId    String
+  mealType  String   // BREAKFAST, LUNCH, DINNER, SNACK
+  foodItems String   @default("[]") // JSON array of food items
+  calories  Int?
+  protein   Float?
+  carbs     Float?
+  fats      Float?
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@index([mealType])
+  @@index([userId, date])
+}
+
+model WaterIntake {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int      // ml
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@index([userId, date])
+}
+
+// ============================================================================
+// LEARNING & DEVELOPMENT MODELS
+// ============================================================================
+
+model LearningResource {
+  id                   String    @id @default(cuid())
+  userId               String
+  title                String
+  type                 String    // BOOK, COURSE, CERTIFICATION, ARTICLE
+  category             String
+  completionPercentage Float     @default(0)
+  timeInvested         Int       @default(0) // minutes
+  startDate            DateTime
+  completedAt          DateTime?
+  notes                String?
+  url                  String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([category])
+  @@index([userId, type])
+  @@index([completionPercentage])
+}
+
+// ============================================================================
+// ANALYTICS MODELS
+// ============================================================================
+
+model DailyMetrics {
+  id               String   @id @default(cuid())
+  userId           String
+  date             DateTime @unique
+  tasksCompleted   Int      @default(0)
+  tasksOnTime      Int      @default(0)
+  habitsCompleted  Int      @default(0)
+  exerciseMinutes  Int      @default(0)
+  caloriesTracked  Boolean  @default(false)
+  waterGoalMet     Boolean  @default(false)
+  learningMinutes  Int      @default(0)
+  productivityScore Float   @default(0)
+  wellnessScore    Float    @default(0)
+  growthScore      Float    @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+  @@index([userId, date])
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  title       String
+  description String
+  unlockedAt  DateTime @default(now())
+  category    String   // PRODUCTIVITY, WELLNESS, GROWTH, FINANCIAL
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([category])
+  @@index([unlockedAt])
+  @@index([userId, category])
+}
+
+// ============================================================================
+// NOTIFICATION MODELS
+// ============================================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // TASK_REMINDER, HABIT_NUDGE, ACHIEVEMENT, BUDGET_ALERT, GOAL_PROGRESS
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  data      Json?    // Additional notification data
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+// ============================================================================
+// OFFLINE SYNC MODELS
+// ============================================================================
+
+model SyncQueue {
+  id        String   @id @default(cuid())
+  userId    String
+  operation String   // CREATE, UPDATE, DELETE
+  entity    String   // Task, Habit, Transaction, etc.
+  entityId  String
+  data      Json
+  timestamp DateTime @default(now())
+  synced    Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([synced])
+  @@index([timestamp])
+  @@index([userId, synced])
+}
+
+model ConflictResolution {
+  id             String   @id @default(cuid())
+  userId         String
+  entity         String
+  entityId       String
+  localVersion   Json
+  serverVersion  Json
+  resolvedVersion Json
+  strategy       String   // LOCAL_WINS, SERVER_WINS, MERGE, MANUAL
+  resolvedAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([entity])
+  @@index([resolvedAt])
+}
+
+// ============================================================================
+// INTEGRATION MODELS
+// ============================================================================
+
+model Integration {
+  id            String    @id @default(cuid())
+  userId        String
+  provider      String    // GOOGLE_CALENDAR, OUTLOOK, FITBIT, APPLE_HEALTH, TODOIST, NOTION
+  providerUserId String?  // External user ID from the provider
+  accessToken   String?   // Encrypted access token
+  refreshToken  String?   // Encrypted refresh token
+  tokenExpiry   DateTime?
+  status        String    @default("ACTIVE") // ACTIVE, DISCONNECTED, ERROR
+  lastSyncAt    DateTime?
+  syncFrequency String    @default("HOURLY") // MANUAL, HOURLY, DAILY
+  config        Json?     // Provider-specific configuration
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider])
+  @@index([status])
+  @@index([userId, status])
+}

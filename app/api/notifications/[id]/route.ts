@@ -1,0 +1,45 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth/config'
+import { notificationRepository } from '@/lib/repositories/notification-repository'
+
+/**
+ * PATCH /api/notifications/[id]
+ * Mark a notification as read
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const { id } = await params
+    const notification = await notificationRepository.markAsRead(
+      id,
+      session.user.id
+    )
+
+    if (!notification) {
+      return NextResponse.json(
+        { error: 'Notification not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json(notification)
+  } catch (error) {
+    console.error('Error marking notification as read:', error)
+    return NextResponse.json(
+      { error: 'Failed to update notification' },
+      { status: 500 }
+    )
+  }
+}

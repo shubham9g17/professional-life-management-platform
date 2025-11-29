@@ -1,0 +1,7 @@
+export { DashboardOverview } from './dashboard-overview'
+export { ProductivityWidget } from './productivity-widget'
+export { WellnessWidget } from './wellness-widget'
+export { GrowthWidget } from './growth-widget'
+export { FinancialWidget } from './financial-widget'
+export { QuickActionsWidget } from './quick-actions-widget'
+export { ActivityFeedWidget } from './activity-feed-widget'
