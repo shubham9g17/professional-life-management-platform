@@ -1,0 +1,306 @@
+{
+  "dashboard": {
+    "title": "Professional Life Management Platform - Overview",
+    "description": "Main monitoring dashboard for system health and performance",
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "health_status",
+            "legendFormat": "Status"
+          }
+        ],
+        "thresholds": [
+          { "value": 0, "color": "red", "label": "Unhealthy" },
+          { "value": 1, "color": "yellow", "label": "Degraded" },
+          { "value": 2, "color": "green", "label": "Healthy" }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Uptime",
+        "type": "stat",
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "uptime_percentage_24h",
+            "legendFormat": "24h Uptime"
+          }
+        ],
+        "unit": "percent",
+        "thresholds": [
+          { "value": 0, "color": "red" },
+          { "value": 99, "color": "yellow" },
+          { "value": 99.9, "color": "green" }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Active Users",
+        "type": "stat",
+        "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "active_users_count",
+            "legendFormat": "Active Users"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "yAxis": {
+          "label": "Requests per second"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_errors_total[5m]) / rate(http_requests_total[5m]) * 100",
+            "legendFormat": "Error Rate %"
+          }
+        ],
+        "yAxis": {
+          "label": "Error Rate (%)"
+        },
+        "thresholds": [
+          { "value": 1, "color": "yellow" },
+          { "value": 5, "color": "red" }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Response Time (p95)",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 Response Time"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "p50 Response Time"
+          }
+        ],
+        "yAxis": {
+          "label": "Response Time (ms)"
+        },
+        "thresholds": [
+          { "value": 200, "color": "green" },
+          { "value": 1000, "color": "yellow" },
+          { "value": 2000, "color": "red" }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Database Performance",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(database_queries_total[5m])",
+            "legendFormat": "Queries/sec"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 Query Time"
+          }
+        ],
+        "yAxis": {
+          "label": "Queries/sec & Time (ms)"
+        }
+      },
+      {
+        "id": 8,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 20, "w": 8, "h": 6 },
+        "targets": [
+          {
+            "expr": "process_memory_usage_bytes / process_memory_limit_bytes * 100",
+            "legendFormat": "Memory Usage %"
+          }
+        ],
+        "yAxis": {
+          "label": "Memory Usage (%)",
+          "max": 100
+        },
+        "thresholds": [
+          { "value": 75, "color": "yellow" },
+          { "value": 90, "color": "red" }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "CPU Usage",
+        "type": "graph",
+        "gridPos": { "x": 8, "y": 20, "w": 8, "h": 6 },
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total[5m]) * 100",
+            "legendFormat": "CPU Usage %"
+          }
+        ],
+        "yAxis": {
+          "label": "CPU Usage (%)",
+          "max": 100
+        },
+        "thresholds": [
+          { "value": 70, "color": "yellow" },
+          { "value": 90, "color": "red" }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Cache Hit Rate",
+        "type": "graph",
+        "gridPos": { "x": 16, "y": 20, "w": 8, "h": 6 },
+        "targets": [
+          {
+            "expr": "rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m])) * 100",
+            "legendFormat": "Cache Hit Rate %"
+          }
+        ],
+        "yAxis": {
+          "label": "Hit Rate (%)",
+          "max": 100
+        },
+        "thresholds": [
+          { "value": 70, "color": "red" },
+          { "value": 85, "color": "yellow" },
+          { "value": 95, "color": "green" }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Top API Endpoints by Request Count",
+        "type": "table",
+        "gridPos": { "x": 0, "y": 26, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "topk(10, sum by (endpoint) (rate(http_requests_total[5m])))",
+            "format": "table"
+          }
+        ],
+        "columns": [
+          { "field": "endpoint", "header": "Endpoint" },
+          { "field": "value", "header": "Requests/sec" }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Top Errors",
+        "type": "table",
+        "gridPos": { "x": 12, "y": 26, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "topk(10, sum by (error_type) (rate(errors_total[5m])))",
+            "format": "table"
+          }
+        ],
+        "columns": [
+          { "field": "error_type", "header": "Error Type" },
+          { "field": "value", "header": "Occurrences/sec" }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Database Connections",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 34, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "database_connections_active",
+            "legendFormat": "Active"
+          },
+          {
+            "expr": "database_connections_idle",
+            "legendFormat": "Idle"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Redis Operations",
+        "type": "graph",
+        "gridPos": { "x": 6, "y": 34, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(redis_commands_total[5m])",
+            "legendFormat": "Commands/sec"
+          }
+        ],
+        "yAxis": {
+          "label": "Operations per second"
+        }
+      },
+      {
+        "id": 15,
+        "title": "Recent Alerts",
+        "type": "logs",
+        "gridPos": { "x": 0, "y": 42, "w": 24, "h": 8 },
+        "targets": [
+          {
+            "expr": "alerts_fired",
+            "format": "logs"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": true,
+          "wrapLogMessage": true
+        }
+      }
+    ],
+    "annotations": [
+      {
+        "name": "Deployments",
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "iconColor": "blue",
+        "tags": ["deployment"]
+      },
+      {
+        "name": "Incidents",
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "iconColor": "red",
+        "tags": ["incident"]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "custom",
+          "options": ["production", "staging", "development"],
+          "current": "production"
+        },
+        {
+          "name": "time_range",
+          "type": "interval",
+          "options": ["5m", "15m", "1h", "6h", "24h", "7d"],
+          "current": "1h"
+        }
+      ]
+    }
+  }
+}
