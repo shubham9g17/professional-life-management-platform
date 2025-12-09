@@ -1,53 +1,43 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
-import { applySecurityHeaders } from '@/lib/security/headers';
 
 export default withAuth(
   function middleware(req) {
-    const { pathname } = req.nextUrl;
-    const token = req.nextauth.token;
+    const secureToken = req.cookies.get('__Secure-next-auth.session-token');
+    const normalToken = req.cookies.get('next-auth.session-token');
+    const hasToken = secureToken || normalToken;
 
-    // 🔍 Server logs (visible in Vercel)
-    console.log('[Middleware] Path:', pathname);
-    console.log('[Middleware] Token Present:', !!token);
+    console.log('[Middleware] Token Present:', !!hasToken);
 
-    const response = NextResponse.next();
-    return applySecurityHeaders(response);
+    return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl;
+      authorized: ({ req }) => {
+        const pathname = req.nextUrl.pathname;
 
-        // Log the authorization decision
-        console.log('[Auth Check] Path:', pathname, '| Token:', !!token);
+        const secureToken = req.cookies.get('__Secure-next-auth.session-token');
+        const normalToken = req.cookies.get('next-auth.session-token');
+        const hasToken = secureToken || normalToken;
 
-        // Public routes allowed without token
+        console.log(`[Auth Check] Path: ${pathname} → Token: ${!!hasToken}`);
+
         if (
           pathname === '/' ||
-          pathname.startsWith('/auth/') ||
-          pathname.startsWith('/api/auth/')
+          pathname.startsWith('/auth/')
         ) {
-          console.log('[Auth Check] Public route → allow');
           return true;
         }
 
-        const isAllowed = !!token;
-        console.log(
-          `[Auth Check] Protected route → ${isAllowed ? 'allow' : 'deny'}`
-        );
-        return isAllowed;
+        return !!hasToken;
       },
     },
-    pages: {
-      signIn: '/auth/signin',
-    },
+    pages: { signIn: '/auth/signin' },
   }
 );
 
 export const config = {
   matcher: [
-    // ❗ Excluding `/auth/*` here to prevent redirect loops
-    '/((?!api|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
