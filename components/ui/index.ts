@@ -18,8 +18,24 @@ export { Switch } from './switch'
 export { Textarea } from './textarea'
 export type { TextareaProps } from './textarea'
 
-export { Select } from './select'
-export type { SelectProps } from './select'
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+} from './select'
+
+export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './sheet'
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip'
+
+export { Progress } from './progress'
+
+export { Separator } from './separator'
 
 // Form Components
 export { Form, FormField, FormLabel, FormDescription, FormMessage } from './form'

@@ -1,10 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { Plus, Search, X } from 'lucide-react'
 import { TaskCard } from './task-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 
 interface Task {
   id: string
@@ -29,6 +37,8 @@ interface TaskListProps {
   onCreateNew?: () => void
 }
 
+const ALL = '__all__'
+
 export function TaskList({ tasks, onEdit, onDelete, onComplete, onCreateNew }: TaskListProps) {
   const [filters, setFilters] = useState({
     workspace: '',
@@ -46,119 +56,134 @@ export function TaskList({ tasks, onEdit, onDelete, onComplete, onCreateNew }: T
       return (
         task.title.toLowerCase().includes(searchLower) ||
         task.description?.toLowerCase().includes(searchLower) ||
-        task.tags.some(tag => tag.toLowerCase().includes(searchLower))
+        task.tags.some((tag) => tag.toLowerCase().includes(searchLower))
       )
     }
     return true
   })
 
   const clearFilters = () => {
-    setFilters({
-      workspace: '',
-      status: '',
-      priority: '',
-      search: '',
-    })
+    setFilters({ workspace: '', status: '', priority: '', search: '' })
   }
 
-  const hasActiveFilters = Object.values(filters).some(v => v !== '')
+  const hasActiveFilters = Object.values(filters).some((v) => v !== '')
+
+  const handleSelect = (key: 'workspace' | 'status' | 'priority') => (value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value === ALL ? '' : value }))
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Tasks</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Tasks</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
             {hasActiveFilters && ` (filtered from ${tasks.length})`}
           </p>
         </div>
         {onCreateNew && (
           <Button onClick={onCreateNew}>
-            + New Task
+            <Plus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            New Task
           </Button>
         )}
       </div>
 
-      {/* Filters */}
-      <div className="bg-white border rounded-lg p-4 space-y-4">
+      <div className="bento-card space-y-4 p-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">Filters</h3>
+          <h3 className="font-semibold text-foreground">Filters</h3>
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Clear All
+              <X className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+              Clear
             </Button>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-1.5">
             <Label htmlFor="search">Search</Label>
-            <Input
-              id="search"
-              placeholder="Search tasks..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            />
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="search"
+                placeholder="Search tasks..."
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                className="pl-9"
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="workspace">Workspace</Label>
-            <select
-              id="workspace"
-              value={filters.workspace}
-              onChange={(e) => setFilters({ ...filters, workspace: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <Select
+              value={filters.workspace || ALL}
+              onValueChange={handleSelect('workspace')}
             >
-              <option value="">All Workspaces</option>
-              <option value="PROFESSIONAL">Professional</option>
-              <option value="PERSONAL">Personal</option>
-              <option value="LEARNING">Learning</option>
-            </select>
+              <SelectTrigger id="workspace">
+                <SelectValue placeholder="All Workspaces" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All Workspaces</SelectItem>
+                <SelectItem value="PROFESSIONAL">Professional</SelectItem>
+                <SelectItem value="PERSONAL">Personal</SelectItem>
+                <SelectItem value="LEARNING">Learning</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <Select
+              value={filters.status || ALL}
+              onValueChange={handleSelect('status')}
             >
-              <option value="">All Statuses</option>
-              <option value="TODO">To Do</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
-            </select>
+              <SelectTrigger id="status">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All Statuses</SelectItem>
+                <SelectItem value="TODO">To Do</SelectItem>
+                <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="priority">Priority</Label>
-            <select
-              id="priority"
-              value={filters.priority}
-              onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <Select
+              value={filters.priority || ALL}
+              onValueChange={handleSelect('priority')}
             >
-              <option value="">All Priorities</option>
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="URGENT">Urgent</option>
-            </select>
+              <SelectTrigger id="priority">
+                <SelectValue placeholder="All Priorities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All Priorities</SelectItem>
+                <SelectItem value="LOW">Low</SelectItem>
+                <SelectItem value="MEDIUM">Medium</SelectItem>
+                <SelectItem value="HIGH">High</SelectItem>
+                <SelectItem value="URGENT">Urgent</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
 
-      {/* Task List */}
       {filteredTasks.length === 0 ? (
-        <div className="text-center py-12 bg-white border rounded-lg">
-          <p className="text-gray-500 text-lg">
+        <div className="bento-card flex flex-col items-center gap-3 py-16 text-center">
+          <p className="text-base text-muted-foreground">
             {hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
           </p>
           {!hasActiveFilters && onCreateNew && (
-            <Button onClick={onCreateNew} className="mt-4">
+            <Button onClick={onCreateNew}>
+              <Plus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
               Create Your First Task
             </Button>
           )}

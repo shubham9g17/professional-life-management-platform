@@ -137,14 +137,17 @@ export function AuthForm({ mode }: AuthFormProps) {
           autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
         />
         {mode === 'signup' && (
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Must be at least 8 characters with uppercase, lowercase, and numbers
           </p>
         )}
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+        <div
+          role="alert"
+          className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+        >
           {error}
         </div>
       )}
@@ -161,13 +164,13 @@ export function AuthForm({ mode }: AuthFormProps) {
           : 'Create Account'}
       </Button>
 
-      <div className="text-center text-sm text-gray-600">
+      <div className="text-center text-sm text-muted-foreground">
         {mode === 'signin' ? (
           <>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <a
               href="/auth/signup"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
             >
               Sign up
             </a>
@@ -177,7 +180,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             Already have an account?{' '}
             <a
               href="/auth/signin"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
             >
               Sign in
             </a>

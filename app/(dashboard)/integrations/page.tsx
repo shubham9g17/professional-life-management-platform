@@ -1,9 +1,20 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
+import { motion, useReducedMotion } from 'framer-motion'
+import {
+  Calendar as CalendarIcon,
+  Mail,
+  Watch,
+  HeartPulse,
+  CheckSquare,
+  StickyNote,
+  Plug,
+  RefreshCw,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 interface Integration {
   id: string
@@ -15,36 +26,45 @@ interface Integration {
   updatedAt: string
 }
 
-const PROVIDER_INFO: Record<string, { name: string; description: string; icon: string }> = {
+const PROVIDER_INFO: Record<
+  string,
+  { name: string; description: string; Icon: typeof CalendarIcon; tint: string }
+> = {
   GOOGLE_CALENDAR: {
     name: 'Google Calendar',
     description: 'Sync your calendar events with tasks',
-    icon: '📅',
+    Icon: CalendarIcon,
+    tint: 'text-chart-1',
   },
   OUTLOOK: {
     name: 'Outlook Calendar',
     description: 'Sync your Outlook calendar with tasks',
-    icon: '📧',
+    Icon: Mail,
+    tint: 'text-chart-2',
   },
   FITBIT: {
     name: 'Fitbit',
     description: 'Sync fitness data and activities',
-    icon: '⌚',
+    Icon: Watch,
+    tint: 'text-chart-3',
   },
   APPLE_HEALTH: {
     name: 'Apple Health',
     description: 'Sync health and fitness data',
-    icon: '🍎',
+    Icon: HeartPulse,
+    tint: 'text-destructive',
   },
   TODOIST: {
     name: 'Todoist',
     description: 'Sync tasks and projects',
-    icon: '✓',
+    Icon: CheckSquare,
+    tint: 'text-chart-4',
   },
   NOTION: {
     name: 'Notion',
     description: 'Sync pages and databases',
-    icon: '📝',
+    Icon: StickyNote,
+    tint: 'text-foreground',
   },
 }
 
@@ -53,6 +73,7 @@ export default function IntegrationsPage() {
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState<string | null>(null)
   const [syncing, setSyncing] = useState<string | null>(null)
+  const reduce = useReducedMotion()
 
   useEffect(() => {
     fetchIntegrations()
@@ -139,16 +160,14 @@ export default function IntegrationsPage() {
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeStyles = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return 'bg-green-500'
+        return 'bg-success/10 text-success ring-1 ring-success/20'
       case 'ERROR':
-        return 'bg-red-500'
-      case 'DISCONNECTED':
-        return 'bg-gray-500'
+        return 'bg-destructive/10 text-destructive ring-1 ring-destructive/20'
       default:
-        return 'bg-gray-500'
+        return 'bg-muted text-muted-foreground ring-1 ring-border'
     }
   }
 
@@ -162,71 +181,112 @@ export default function IntegrationsPage() {
 
   if (loading) {
     return (
-      <div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading integrations...</div>
+      <div className="space-y-6">
+        <Skeleton className="h-9 w-48" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-44 rounded-[var(--card-radius)]" />
+          ))}
         </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Integrations</h1>
-        <p className="text-gray-600">
-          Connect external services to sync your data automatically
-        </p>
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y: 6 }}
+      animate={reduce ? undefined : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Plug className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Integrations
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Connect external services to sync your data automatically.
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Object.entries(PROVIDER_INFO).map(([provider, info]) => {
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Object.entries(PROVIDER_INFO).map(([provider, info], i) => {
           const integration = getIntegration(provider)
           const connected = isConnected(provider)
+          const Icon = info.Icon
 
           return (
-            <Card key={provider} className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="text-3xl">{info.icon}</div>
+            <motion.article
+              key={provider}
+              initial={reduce ? false : { opacity: 0, y: 6 }}
+              animate={reduce ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: reduce ? 0 : Math.min(i, 8) * 0.04 }}
+              className="bento-card flex flex-col p-5"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/50 ring-1 ring-border', info.tint)}>
+                    <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold">{info.name}</h3>
+                    <h3 className="font-semibold text-foreground">{info.name}</h3>
                     {connected && integration && (
-                      <Badge className={getStatusColor(integration.status)}>
-                        {integration.status}
-                      </Badge>
+                      <span
+                        className={cn(
+                          'mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide',
+                          getStatusBadgeStyles(integration.status)
+                        )}
+                      >
+                        {integration.status.toLowerCase()}
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4">{info.description}</p>
+              <p className="mt-3 flex-1 text-sm text-muted-foreground">{info.description}</p>
 
               {connected && integration ? (
-                <div className="space-y-3">
-                  <div className="text-xs text-gray-500">
-                    <div>
-                      Last sync:{' '}
-                      {integration.lastSyncAt
-                        ? new Date(integration.lastSyncAt).toLocaleString()
-                        : 'Never'}
+                <div className="mt-4 space-y-3">
+                  <dl className="text-xs text-muted-foreground">
+                    <div className="flex justify-between gap-2">
+                      <dt>Last sync</dt>
+                      <dd className="text-foreground">
+                        {integration.lastSyncAt
+                          ? new Date(integration.lastSyncAt).toLocaleString()
+                          : 'Never'}
+                      </dd>
                     </div>
-                    <div>Frequency: {integration.syncFrequency}</div>
-                  </div>
-
+                    <div className="mt-1 flex justify-between gap-2">
+                      <dt>Frequency</dt>
+                      <dd className="text-foreground">{integration.syncFrequency}</dd>
+                    </div>
+                  </dl>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleSync(integration.id)}
                       disabled={syncing === integration.id}
+                      aria-label={`Sync ${info.name}`}
                     >
-                      {syncing === integration.id ? 'Syncing...' : 'Sync Now'}
+                      <RefreshCw
+                        className={cn('h-3.5 w-3.5', syncing === integration.id && 'animate-spin')}
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
+                      {syncing === integration.id ? 'Syncing' : 'Sync now'}
                     </Button>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => handleDisconnect(integration.id)}
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      aria-label={`Disconnect ${info.name}`}
                     >
                       Disconnect
                     </Button>
@@ -236,15 +296,15 @@ export default function IntegrationsPage() {
                 <Button
                   onClick={() => handleConnect(provider)}
                   disabled={connecting === provider}
-                  className="w-full"
+                  className="mt-4 w-full"
                 >
-                  {connecting === provider ? 'Connecting...' : 'Connect'}
+                  {connecting === provider ? 'Connecting…' : 'Connect'}
                 </Button>
               )}
-            </Card>
+            </motion.article>
           )
         })}
       </div>
-    </div>
+    </motion.div>
   )
 }

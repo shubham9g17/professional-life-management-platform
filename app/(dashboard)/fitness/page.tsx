@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FitnessDashboard } from '@/components/fitness/fitness-dashboard'
 import { ExerciseLog } from '@/components/fitness/exercise-log'
 import { FitnessGoals } from '@/components/fitness/fitness-goals'
@@ -14,6 +16,7 @@ export default function FitnessPage() {
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
+  const reduce = useReducedMotion()
 
   useEffect(() => {
     fetchData()
@@ -158,14 +161,30 @@ export default function FitnessPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading fitness data...</div>
+      <div className="space-y-6">
+        <Skeleton className="h-9 w-40" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-[var(--card-radius)]" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y: 6 }}
+      animate={reduce ? undefined : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Fitness</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Track exercise, goals, and health metrics
+        </p>
+      </div>
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -197,6 +216,6 @@ export default function FitnessPage() {
           <HealthMetricsForm onSubmit={handleMetricsSubmit} />
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   )
 }

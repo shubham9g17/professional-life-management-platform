@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { Menu, ChevronDown, Settings, LogOut } from 'lucide-react'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { Button } from '@/components/ui/button'
 import { NotificationList } from '@/components/notifications/notification-list'
 
 interface DashboardHeaderProps {
@@ -20,47 +20,31 @@ export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false)
 
   return (
-    <header className="border-b border-border bg-card">
+    <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur-md supports-[backdrop-filter]:bg-card/60">
       <div className="flex items-center justify-between px-4 py-3 md:px-6">
-        {/* Left section - Logo and menu button */}
         <div className="flex items-center gap-4">
           {onMenuClick && (
             <button
               onClick={onMenuClick}
-              className="p-2 rounded-lg hover:bg-accent md:hidden"
-              aria-label="Open menu"
+              className="p-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Open navigation menu"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <Menu className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
             </button>
           )}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">PL</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-sm">
+              <span className="text-sm font-bold">PL</span>
             </div>
-            <h1 className="hidden md:block text-lg font-semibold">
+            <h1 className="hidden text-lg font-semibold tracking-tight md:block">
               Professional Life
             </h1>
           </div>
         </div>
 
-        {/* Right section - Actions and user menu */}
-        <div className="flex items-center gap-2">
-          {/* Theme toggle */}
+        <div className="flex items-center gap-1 md:gap-2">
           <ThemeToggle />
 
-          {/* Notifications */}
           <div className="relative">
             <NotificationBell onClick={() => setShowNotifications(!showNotifications)} />
             {showNotifications && (
@@ -69,8 +53,8 @@ export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
                   className="fixed inset-0 z-40"
                   onClick={() => setShowNotifications(false)}
                 />
-                <div className="absolute right-0 top-full mt-2 w-80 md:w-96 z-50">
-                  <div className="bg-card border border-border rounded-lg shadow-lg">
+                <div className="absolute right-0 top-full mt-2 w-80 z-50 md:w-96">
+                  <div className="rounded-xl border border-border bg-popover shadow-lg">
                     <NotificationList onClose={() => setShowNotifications(false)} />
                   </div>
                 </div>
@@ -78,34 +62,21 @@ export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
             )}
           </div>
 
-          {/* User menu */}
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent transition-colors"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="User menu"
+              aria-haspopup="menu"
+              aria-expanded={showUserMenu}
             >
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-medium text-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
+                <span className="text-sm font-medium">
                   {user.name.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <span className="hidden md:block text-sm font-medium">
-                {user.name}
-              </span>
-              <svg
-                className="w-4 h-4 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              <span className="hidden text-sm font-medium md:block">{user.name}</span>
+              <ChevronDown className="hidden h-4 w-4 text-muted-foreground md:block" strokeWidth={1.75} aria-hidden="true" />
             </button>
 
             {showUserMenu && (
@@ -114,58 +85,33 @@ export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
                   className="fixed inset-0 z-40"
                   onClick={() => setShowUserMenu(false)}
                 />
-                <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-lg shadow-lg z-50">
-                  <div className="p-3 border-b border-border">
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-popover shadow-lg z-50"
+                >
+                  <div className="border-b border-border p-3">
+                    <p className="text-sm font-medium text-foreground">{user.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                   </div>
-                  <div className="p-2">
+                  <div className="p-1.5">
                     <button
+                      role="menuitem"
                       onClick={() => {
                         window.location.href = '/settings'
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
+                      <Settings className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                       Settings
                     </button>
                     <button
+                      role="menuitem"
                       onClick={() => {
                         window.location.href = '/auth/signout'
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors text-red-600"
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
+                      <LogOut className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                       Sign Out
                     </button>
                   </div>

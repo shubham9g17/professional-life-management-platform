@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Plus, Pencil, Trash2, Check, Flame } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { HabitBoard } from '@/components/habits/habit-board'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 import { HabitCalendar } from '@/components/habits/habit-calendar'
 import { HabitProgress } from '@/components/habits/habit-progress'
 import { HabitForm } from '@/components/habits/habit-form'
@@ -23,12 +26,12 @@ interface Habit {
 }
 
 export default function HabitsPage() {
-  const [habits, setHabits] = useState<any[]>([])
+  const [habits, setHabits] = useState<Habit[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [editingHabit, setEditingHabit] = useState<any | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
   const { toast } = useToast()
+  const reduce = useReducedMotion()
 
   useEffect(() => {
     fetchHabits()
@@ -53,132 +56,111 @@ export default function HabitsPage() {
     }
   }
 
-  const handleCreateHabit = async (data: any) => {
-    setIsSubmitting(true)
+  const handleCreateHabit = async (data: Partial<Habit>) => {
     try {
       const response = await fetch('/api/habits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-
       if (response.ok) {
         const result = await response.json()
         setHabits([...habits, result.habit])
         setShowForm(false)
-        toast({
-          title: 'Success',
-          description: 'Habit created successfully',
-        })
+        toast({ title: 'Habit created' })
       } else {
-        throw new Error('Failed to create habit')
+        throw new Error('Failed')
       }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create habit',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsSubmitting(false)
+    } catch {
+      toast({ title: 'Error', description: 'Failed to create habit', variant: 'destructive' })
     }
   }
 
-  const handleUpdateHabit = async (data: any) => {
+  const handleUpdateHabit = async (data: Partial<Habit>) => {
     if (!editingHabit) return
-
-    setIsSubmitting(true)
     try {
       const response = await fetch(`/api/habits/${editingHabit.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-
       if (response.ok) {
         const result = await response.json()
-        setHabits(habits.map(h => h.id === editingHabit.id ? result.habit : h))
+        setHabits(habits.map((h) => (h.id === editingHabit.id ? result.habit : h)))
         setEditingHabit(null)
-        toast({
-          title: 'Success',
-          description: 'Habit updated successfully',
-        })
+        toast({ title: 'Habit updated' })
       } else {
-        throw new Error('Failed to update habit')
+        throw new Error('Failed')
       }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update habit',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsSubmitting(false)
+    } catch {
+      toast({ title: 'Error', description: 'Failed to update habit', variant: 'destructive' })
     }
   }
 
   const handleDeleteHabit = async (habitId: string) => {
-    if (!confirm('Are you sure you want to delete this habit?')) return
-
+    if (!confirm('Delete this habit? This cannot be undone.')) return
     try {
-      const response = await fetch(`/api/habits/${habitId}`, {
-        method: 'DELETE',
-      })
-
+      const response = await fetch(`/api/habits/${habitId}`, { method: 'DELETE' })
       if (response.ok) {
-        setHabits(habits.filter(h => h.id !== habitId))
-        toast({
-          title: 'Success',
-          description: 'Habit deleted successfully',
-        })
+        setHabits(habits.filter((h) => h.id !== habitId))
+        toast({ title: 'Habit deleted' })
       } else {
-        throw new Error('Failed to delete habit')
+        throw new Error('Failed')
       }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete habit',
-        variant: 'destructive',
-      })
+    } catch {
+      toast({ title: 'Error', description: 'Failed to delete habit', variant: 'destructive' })
     }
   }
 
   const handleCompleteHabit = async (habitId: string) => {
     try {
-      const response = await fetch(`/api/habits/${habitId}/complete`, {
-        method: 'POST',
-      })
-
+      const response = await fetch(`/api/habits/${habitId}/complete`, { method: 'POST' })
       if (response.ok) {
         const result = await response.json()
-        setHabits(habits.map(h => h.id === habitId ? result.habit : h))
-        toast({
-          title: 'Success',
-          description: 'Habit completed! 🎉',
-        })
+        setHabits(habits.map((h) => (h.id === habitId ? result.habit : h)))
+        toast({ title: 'Habit completed' })
       } else {
-        throw new Error('Failed to complete habit')
+        throw new Error('Failed')
       }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to complete habit',
-        variant: 'destructive',
-      })
+    } catch {
+      toast({ title: 'Error', description: 'Failed to complete habit', variant: 'destructive' })
     }
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading habits...</div>
+      <div className="space-y-6">
+        <Skeleton className="h-9 w-40" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-44 rounded-[var(--card-radius)]" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
     <>
-      <div className="space-y-6">
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 6 }}
+        animate={reduce ? undefined : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Habits</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {habits.length} active {habits.length === 1 ? 'habit' : 'habits'}
+            </p>
+          </div>
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            New habit
+          </Button>
+        </div>
+
         <Tabs defaultValue="board" className="w-full">
           <TabsList>
             <TabsTrigger value="board">Board</TabsTrigger>
@@ -187,92 +169,190 @@ export default function HabitsPage() {
           </TabsList>
 
           <TabsContent value="board" className="mt-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Habits</h2>
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  + New Habit
-                </button>
+            {habits.length === 0 ? (
+              <div className="bento-card flex flex-col items-center gap-3 py-16 text-center">
+                <p className="text-base text-muted-foreground">No habits yet — start your first one</p>
+                <Button onClick={() => setShowForm(true)}>
+                  <Plus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                  Create habit
+                </Button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {habits.map((habit: any) => (
-                  <div key={habit.id} className="bg-white rounded-lg shadow p-4">
-                    <h3 className="font-semibold text-lg mb-2">{habit.name}</h3>
-                    <p className="text-sm text-gray-600 mb-4">{habit.description}</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleCompleteHabit(habit.id)}
-                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-                      >
-                        Complete
-                      </button>
-                      <button
-                        onClick={() => setEditingHabit(habit)}
-                        className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteHabit(habit.id)}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {habits.map((habit, index) => (
+                  <HabitCard
+                    key={habit.id}
+                    habit={habit}
+                    index={index}
+                    onComplete={() => handleCompleteHabit(habit.id)}
+                    onEdit={() => setEditingHabit(habit)}
+                    onDelete={() => handleDeleteHabit(habit.id)}
+                  />
                 ))}
               </div>
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="calendar" className="mt-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Habit Calendar</h2>
-              <p className="text-gray-600">Calendar view will appear here.</p>
+            <div className="bento-card p-5">
+              <HabitCalendar
+                habits={habits.map((h) => ({
+                  id: h.id,
+                  name: h.name,
+                  completions: [],
+                }))}
+              />
             </div>
           </TabsContent>
 
           <TabsContent value="progress" className="mt-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Habit Progress</h2>
-              <p className="text-gray-600">Progress tracking will appear here.</p>
-            </div>
+            {habits.length === 0 ? (
+              <div className="bento-card flex flex-col items-center gap-3 py-16 text-center">
+                <p className="text-base text-muted-foreground">
+                  Track at least one habit to see progress.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {habits.map((habit) => (
+                  <div key={habit.id} className="bento-card p-5">
+                    <HabitProgress
+                      habit={{
+                        id: habit.id,
+                        name: habit.name,
+                        currentStreak: habit.currentStreak,
+                        longestStreak: habit.longestStreak,
+                        completionRate: 0,
+                        completions: [],
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
-      </div>
+      </motion.div>
 
-      {/* Create Habit Dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Habit</DialogTitle>
+            <DialogTitle>Create new habit</DialogTitle>
           </DialogHeader>
-          <HabitForm
-            onSubmit={handleCreateHabit}
-          />
+          <HabitForm onSubmit={handleCreateHabit} />
         </DialogContent>
       </Dialog>
 
-      {/* Edit Habit Dialog */}
       <Dialog open={!!editingHabit} onOpenChange={(open) => !open && setEditingHabit(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Habit</DialogTitle>
+            <DialogTitle>Edit habit</DialogTitle>
           </DialogHeader>
           {editingHabit && (
             <HabitForm
               onSubmit={handleUpdateHabit}
               initialData={{
                 name: editingHabit.name,
-                frequency: editingHabit.frequency as any,
+                frequency: editingHabit.frequency as 'DAILY' | 'WEEKLY' | 'CUSTOM',
               }}
             />
           )}
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+function HabitCard({
+  habit,
+  index,
+  onComplete,
+  onEdit,
+  onDelete,
+}: {
+  habit: Habit
+  index: number
+  onComplete: () => void
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const reduce = useReducedMotion()
+  const completedToday =
+    habit.lastCompletedAt &&
+    new Date(habit.lastCompletedAt).toDateString() === new Date().toDateString()
+
+  return (
+    <motion.article
+      initial={reduce ? false : { opacity: 0, y: 8 }}
+      animate={reduce ? undefined : { opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.3,
+        delay: reduce ? 0 : Math.min(index, 8) * 0.04,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      className="bento-card flex flex-col p-5"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base font-semibold text-foreground">{habit.name}</h3>
+          {habit.description && (
+            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{habit.description}</p>
+          )}
+        </div>
+        {habit.currentStreak > 0 && (
+          <span
+            className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning"
+            title={`Current streak: ${habit.currentStreak}`}
+          >
+            <Flame className="h-3 w-3" strokeWidth={2} aria-hidden="true" />
+            <span data-numeric>{habit.currentStreak}</span>
+          </span>
+        )}
+      </div>
+
+      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-md bg-muted/40 p-2.5">
+          <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">Frequency</dt>
+          <dd className="mt-0.5 font-medium text-foreground capitalize">
+            {habit.frequency.toLowerCase()}
+          </dd>
+        </div>
+        <div className="rounded-md bg-muted/40 p-2.5">
+          <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">Best streak</dt>
+          <dd
+            className="mt-0.5 font-mono text-base font-semibold tabular-nums text-foreground"
+            data-numeric
+          >
+            {habit.longestStreak}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-4 flex items-center gap-2">
+        <Button
+          variant={completedToday ? 'outline' : 'success'}
+          size="sm"
+          onClick={onComplete}
+          className="flex-1"
+          disabled={!!completedToday}
+          aria-label={completedToday ? 'Already completed today' : `Mark ${habit.name} complete`}
+        >
+          <Check className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+          {completedToday ? 'Done today' : 'Complete'}
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onEdit} aria-label={`Edit ${habit.name}`}>
+          <Pencil className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onDelete}
+          aria-label={`Delete ${habit.name}`}
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
+          <Trash2 className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+        </Button>
+      </div>
+    </motion.article>
   )
 }
