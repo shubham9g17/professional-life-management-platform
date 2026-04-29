@@ -37,7 +37,12 @@ export function TransactionForm({ onSubmit, onCancel, initialData, isLoading }: 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
+    // datetime-local emits "YYYY-MM-DDTHH:mm" without timezone; the API's
+    // Zod .datetime() requires a full ISO string with offset.
+    onSubmit({
+      ...formData,
+      date: new Date(formData.date).toISOString(),
+    })
   }
 
   const addTag = () => {

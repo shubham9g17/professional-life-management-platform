@@ -46,6 +46,16 @@ Complete documentation for the Professional Life Management Platform.
 |----------|-------------|
 | [Integrations Guide](./INTEGRATIONS.md) | External service integrations and APIs |
 
+### Testing & Feature Inventory
+
+These live in the repo root rather than `docs/`, since they map 1:1 against code:
+
+| Document | Description |
+|----------|-------------|
+| [../Features.md](../Features.md) | Authoritative feature inventory: every page, every API endpoint, every cross-cutting concern |
+| [../Test.md](../Test.md) | Test plan that maps each feature to its Vitest / Playwright spec, plus known issues and out-of-scope items |
+| [../IMPLEMENTATION_STATUS.md](../IMPLEMENTATION_STATUS.md) | Current snapshot of what's verified, by which tests, and what bugs were found / fixed |
+
 ## 🎯 Quick Links by Use Case
 
 ### I want to...
@@ -66,10 +76,17 @@ Complete documentation for the Professional Life Management Platform.
 - **Quick commands**: [Quick Reference](./QUICK_REFERENCE.md)
 
 #### Develop Features
+- **Find what exists**: [../Features.md](../Features.md)
+- **Find what's tested**: [../Test.md](../Test.md)
 - **Handle errors**: [Error Handling](./ERROR_HANDLING.md)
 - **Optimize performance**: [Performance Optimizations](./PERFORMANCE_OPTIMIZATIONS.md)
 - **Implement caching**: [Caching Strategy](./CACHING_STRATEGY.md)
 - **Customize themes**: [Theme System](./THEME_SYSTEM.md)
+
+#### Test the Application
+- **Map feature → test**: [../Test.md](../Test.md)
+- **Run e2e suite**: `npx playwright test --project=laptop` (requires `npm run dev` running)
+- **Run unit tests**: `npm test`
 
 #### Secure the Application
 - **Security setup**: [Security Guide](./SECURITY.md)
@@ -203,12 +220,13 @@ Guide to integrating external services including calendar apps, fitness trackers
 
 ## 📊 Documentation Statistics
 
-- **Total Documents**: 17
+- **Total Documents**: 20 (17 in `docs/`, plus `Features.md` / `Test.md` / `IMPLEMENTATION_STATUS.md` in repo root)
 - **Getting Started**: 4 guides
 - **Development**: 5 guides
 - **Operations**: 6 guides
 - **Security**: 1 comprehensive guide
 - **Integration**: 1 guide
+- **Testing & Inventory**: 3 (in repo root, kept next to code)
 
 ## 🔄 Keeping Documentation Updated
 

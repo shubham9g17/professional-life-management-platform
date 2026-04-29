@@ -15,15 +15,20 @@ npm start
 # Lint (flat ESLint config, eslint.config.mjs)
 npm run lint
 
-# Tests (Vitest + jsdom + Testing Library + fast-check)
+# Vitest (unit / property-based; jsdom + Testing Library + fast-check)
 npm test                         # one-shot run
 npm run test:watch               # watch mode
 npm run test:ui                  # Vitest UI
 npm run test:coverage            # v8 coverage; only `lib/**` is included for coverage
 
-# Run a single test file or pattern
+# Run a single Vitest file or pattern
 npx vitest run lib/repositories/__tests__/habit-repository.test.ts
 npx vitest run -t "name of test case"
+
+# Playwright e2e (requires `npm run dev` running in another terminal)
+npx playwright test --project=laptop                       # full e2e run
+npx playwright test crud.spec.ts --project=laptop          # one spec
+npx playwright test -g "Tasks CRUD" --project=laptop       # by test name
 
 # Prisma (schema is `prisma/schema.prisma`, datasource = PostgreSQL)
 npx prisma migrate dev           # apply migrations in dev
@@ -71,8 +76,23 @@ npx prisma studio                # browse DB
 
 ### Testing
 
-- `vitest.config.ts` uses `jsdom`, loads `test/setup.ts` (Testing Library cleanup + jest-dom matchers), and aliases `@/*` to the project root.
+**Vitest** (`vitest.config.ts`)
+- Uses `jsdom`, loads `test/setup.ts` (Testing Library cleanup + jest-dom matchers), aliases `@/*` to the project root.
 - Coverage is intentionally scoped to `lib/**` (UI in `app/` and `components/` is excluded). Property-based tests use `fast-check`.
+
+**Playwright** (`playwright.config.ts`, specs in `tests/e2e/`)
+- A one-time `globalSetup` (`tests/e2e/global-setup.ts`) signs up a fresh test user per run and persists the session as `tests/e2e/.auth/state.json`. Every spec inherits authenticated cookies via `storageState`, so `page.request` calls hit the API as that user without re-authenticating.
+- Four projects (`mobile` / `tablet` / `laptop` / `big-screen`). Specs that hit server state (`auth.spec.ts`, `crud.spec.ts`, `side-effects.spec.ts`) are added to `testIgnore` for the non-laptop projects — they don't vary by viewport, and running them 4× would multiply DB churn and trip the 5/15-min signup rate limit. New server-state specs should follow the same pattern.
+- `fullyParallel: false`, `workers: 1` — tests share a single test user. Each test self-cleans (create-then-delete) so the DB stays clean across runs. Exceptions: tasks are soft-deleted (`status='ARCHIVED'`), `HealthMetric` has no DELETE endpoint and is upsert-only.
+- See **`Features.md`** (feature inventory) and **`Test.md`** (per-feature spec mapping + known issues + out-of-scope) for the authoritative coverage map.
+
+### Forms that submit dates
+
+Forms whose backing API uses Zod's `.datetime()` (`Task.dueDate`, `Transaction.date`) must convert the `<input type="datetime-local">` value (`YYYY-MM-DDTHH:mm`, no timezone) to a full ISO string in the form's `handleSubmit` before calling `onSubmit`. Empty values for *optional* date fields must be omitted (not sent as `''`) so `optional()` applies. The fix lives in the form, not the API or the page handler — that's where the empty-vs-set distinction is known. See `components/tasks/task-form.tsx` and `components/finance/transaction-form.tsx` for the canonical pattern.
+
+### Known schema issue
+
+`prisma/schema.prisma` declares `DailyMetrics.date @unique` on the field *and* `@@unique([userId, date])` as a composite. The standalone `@unique` makes only one user platform-wide allowed to own a metrics row per date — every subsequent user's `POST /api/tasks/[id]/complete` 500s with a unique-constraint violation. Fix: drop the field-level `@unique` (keep the composite) and run `npx prisma migrate dev --name fix_dailymetrics_unique`. The corresponding e2e (`side-effects.spec.ts › Tasks completion side-effects`) is gated `.fixme` until the migration lands.
 
 ### Path alias
 

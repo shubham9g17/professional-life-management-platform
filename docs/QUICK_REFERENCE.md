@@ -19,7 +19,7 @@ pm2 start npm --name "app" -- start
 
 ```bash
 # Check system health
-curl https://your-domain.com/health | jq
+curl https://your-domain.com/api/health | jq
 
 # Expected response
 {
@@ -47,7 +47,7 @@ pm2 logs
 ```
 
 ### Check Metrics
-- Health: `https://your-domain.com/health`
+- Health: `https://your-domain.com/api/health`
 - Monitoring Dashboard: See MONITORING.md
 - Error Tracking: Check Sentry dashboard
 
@@ -208,7 +208,7 @@ redis-cli -u $REDIS_URL ping
 ### High Memory Usage
 ```bash
 # Check memory
-curl https://your-domain.com/health | jq '.checks.memory'
+curl https://your-domain.com/api/health | jq '.checks.memory'
 
 # Restart if needed
 pm2 restart all
@@ -226,10 +226,24 @@ LIMIT 10;
 
 ## 🧪 Testing
 
-### Test Critical Flows
+### Run the e2e suite
+
+```bash
+# Vitest (unit / property)
+npm test
+
+# Playwright (e2e — requires `npm run dev` running)
+npx playwright test --project=laptop                  # all suites
+npx playwright test crud.spec.ts --project=laptop     # one spec
+```
+
+See [`../Test.md`](../Test.md) for the per-feature spec mapping.
+
+### Test Critical Flows in production
+
 ```bash
 # Health check
-curl https://your-domain.com/health
+curl https://your-domain.com/api/health
 
 # API endpoint
 curl https://your-domain.com/api/tasks
@@ -279,11 +293,12 @@ curl -H "Authorization: Bearer $CRON_SECRET" \
 - `DATABASE_URL` - PostgreSQL connection string
 - `NEXTAUTH_URL` - Production domain
 - `NEXTAUTH_SECRET` - Auth secret (32+ chars)
-- `REDIS_URL` - Redis connection string
 - `ENCRYPTION_KEY` - Encryption key (32+ chars)
 
 ### Optional Variables
-- `CRON_SECRET` - Cron job authentication
+- `ENABLE_REDIS` - Set to `"false"` to disable Redis caching (default: on if `REDIS_URL` is set)
+- `REDIS_URL` - Redis connection string (only required if `ENABLE_REDIS=true`)
+- `CRON_SECRET` - Cron job authentication (when set, `/api/cron/*` requires `Authorization: Bearer $CRON_SECRET`)
 - `APM_DSN` - Application monitoring
 - `ERROR_TRACKING_DSN` - Error tracking
 - `LOG_LEVEL` - Logging level (info, debug, error)

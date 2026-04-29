@@ -4,16 +4,53 @@ This guide helps diagnose and resolve common issues with the Professional Life M
 
 ## Table of Contents
 
-1. [Quick Diagnostics](#quick-diagnostics)
-2. [Database Issues](#database-issues)
-3. [Authentication Issues](#authentication-issues)
-4. [Performance Issues](#performance-issues)
-5. [Deployment Issues](#deployment-issues)
-6. [API Errors](#api-errors)
-7. [Caching Issues](#caching-issues)
-8. [Security Issues](#security-issues)
-9. [Data Issues](#data-issues)
-10. [Getting Help](#getting-help)
+1. [Known Issues](#known-issues)
+2. [Quick Diagnostics](#quick-diagnostics)
+3. [Database Issues](#database-issues)
+4. [Authentication Issues](#authentication-issues)
+5. [Performance Issues](#performance-issues)
+6. [Deployment Issues](#deployment-issues)
+7. [API Errors](#api-errors)
+8. [Caching Issues](#caching-issues)
+9. [Security Issues](#security-issues)
+10. [Data Issues](#data-issues)
+11. [Getting Help](#getting-help)
+
+## Known Issues
+
+### `POST /api/tasks/[id]/complete` returns 500 with "Unique constraint failed on the fields: (date)"
+
+**Cause:** `prisma/schema.prisma` declares `DailyMetrics.date @unique` *and* `@@unique([userId, date])`. The standalone `@unique` allows only one user platform-wide to own a metrics row per date. Once any user has completed a task today, every other user's completion fails.
+
+**Symptoms:**
+- The first user to complete a task on a given day succeeds.
+- Subsequent users (and every fresh e2e run, since `global-setup.ts` signs up a new user) get a 500.
+- Server log shows: `Invalid 'tx.dailyMetrics.create()' invocation … Unique constraint failed on the fields: (date)`.
+
+**Fix:**
+
+```bash
+# Edit prisma/schema.prisma — remove `@unique` from the field, keep the composite:
+#   date  DateTime              # was: date  DateTime @unique
+#   ...
+#   @@unique([userId, date])    # keep this
+
+npx prisma migrate dev --name fix_dailymetrics_unique
+```
+
+Then drop `.fixme` from `tests/e2e/side-effects.spec.ts › Tasks completion side-effects`.
+
+### Forms with date pickers fail with 400 / "Invalid task data"
+
+**Cause (historical, fixed in this iteration):** `<input type="datetime-local">` emits `YYYY-MM-DDTHH:mm` without a timezone suffix, but Zod's `.datetime()` requires a UTC `Z` or offset. `TaskForm` and `TransactionForm` used to send the raw value (and an empty string for unset optional dates). Both have been fixed to convert in `handleSubmit`.
+
+**If you see this regression again:** check that `components/tasks/task-form.tsx` and `components/finance/transaction-form.tsx` still convert via `new Date(value).toISOString()` and omit empty optional values before calling `onSubmit`. The fix belongs in the form, not in the API or the page handler.
+
+### `PATCH /api/notifications/[id]` returns 500 instead of 404 on unknown id
+
+**Cause (historical, fixed in this iteration):** `prisma.notification.update({ where: { id, userId } })` throws `P2025` when no row matches, so the route's `if (!notification)` branch was dead code. The repository now does `findFirst` first and returns `null` cleanly.
+
+
 
 ## Quick Diagnostics
 
@@ -22,7 +59,7 @@ This guide helps diagnose and resolve common issues with the Professional Life M
 First, check the system health:
 
 ```bash
-curl https://your-domain.com/health
+curl https://your-domain.com/api/health
 ```
 
 Expected healthy response:
@@ -356,7 +393,7 @@ curl https://your-domain.com/api/web-vitals
 
 ```bash
 # Check memory usage
-curl https://your-domain.com/health | jq '.checks.memory'
+curl https://your-domain.com/api/health | jq '.checks.memory'
 
 # Node.js heap snapshot
 node --inspect index.js
@@ -810,7 +847,7 @@ Gather this information:
 3. **Environment:** Production, staging, or development
 4. **Recent changes:** Recent deployments or configuration changes
 5. **Logs:** Relevant log entries
-6. **Health check:** Output from `/health` endpoint
+6. **Health check:** Output from `/api/health` endpoint
 
 ### Support Channels
 
@@ -832,7 +869,7 @@ For critical production issues:
 
 ```bash
 # Quick health check
-curl https://your-domain.com/health | jq
+curl https://your-domain.com/api/health | jq
 
 # View logs
 vercel logs --follow

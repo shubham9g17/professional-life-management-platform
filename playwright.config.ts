@@ -24,7 +24,7 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile',
-      testIgnore: '**/auth.spec.ts',
+      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 375, height: 667 },
@@ -33,7 +33,7 @@ export default defineConfig({
     },
     {
       name: 'tablet',
-      testIgnore: '**/auth.spec.ts',
+      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },
@@ -46,7 +46,7 @@ export default defineConfig({
     },
     {
       name: 'big-screen',
-      testIgnore: '**/auth.spec.ts',
+      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } },
     },
   ],

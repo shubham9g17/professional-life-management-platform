@@ -2,7 +2,14 @@
 
 ## Summary
 
-This document provides a high-level overview of the database schema for the Professional Life Management Platform. The platform uses SQLite for easy development and deployment without requiring a separate database server.
+This document provides a high-level overview of the database schema for the Professional Life Management Platform. The Prisma datasource is **PostgreSQL** (`prisma/schema.prisma`). 18 models are owned by `User` with cascade-on-delete relations.
+
+> **Conventions** (from `CLAUDE.md`):
+> - Enums are stored as **`String` columns** validated by Zod in code (no native Prisma enums).
+> - Array fields (`Task.tags`, `Meal.foodItems`) are stored as **`String @default("[]")`** and `JSON.stringify`/`JSON.parse`'d at the API boundary.
+> - Repositories in `lib/repositories/*` are the only callers of `prisma.*` directly.
+
+> **Known schema issue:** `DailyMetrics.date` is currently declared `@unique` on the field *and* `@@unique([userId, date])` as a composite. The standalone `@unique` makes only one user platform-wide allowed to own a metrics row per date. Drop the field-level `@unique` (keep the composite) and run `npx prisma migrate dev --name fix_dailymetrics_unique`. See [`../IMPLEMENTATION_STATUS.md`](../IMPLEMENTATION_STATUS.md#known-issues-not-yet-fixed) and [`./TROUBLESHOOTING.md`](./TROUBLESHOOTING.md#known-issues).
 
 ## Entity Relationship Diagram (Conceptual)
 
@@ -178,8 +185,9 @@ Ensures data integrity across online/offline transitions.
 - Recent activity queries
 
 ### Data Types
-- **JSON strings**: Tags and arrays stored as JSON for SQLite compatibility
-- **JSON**: Flexible notification and sync data
+- **String columns for enums**: per project convention, `Task.workspace`, `Task.status`, etc. are `String` validated by Zod (not native Prisma enums) — see `CLAUDE.md`
+- **JSON-encoded strings for arrays**: `Task.tags` and `Meal.foodItems` are stored as `String @default("[]")` and parsed at the API boundary
+- **Native JSON columns**: flexible notification `data`, sync queue payloads, conflict-resolution snapshots
 - **Timestamps**: Automatic tracking with indexes
 - **Floats**: Precise metric calculations
 
@@ -219,7 +227,7 @@ All foreign keys use `ON DELETE CASCADE`:
 ## Migration Strategy
 
 ### Initial Migration
-- `20251128161320_initial_schema`: Complete SQLite schema with all models
+- `20251128161320_initial_schema`: Initial schema with all models (the project later migrated from SQLite to PostgreSQL)
 
 ### Future Migrations
 - Additive changes preferred
@@ -247,7 +255,7 @@ All foreign keys use `ON DELETE CASCADE`:
 - Connection pool utilization
 
 ### Maintenance Tasks
-- Regular VACUUM for SQLite optimization
+- Periodic `VACUUM ANALYZE` on PostgreSQL (or rely on autovacuum)
 - Index rebuilding if needed
 - Query plan analysis for slow queries
 - Regular database file backups

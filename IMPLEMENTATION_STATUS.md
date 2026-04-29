@@ -1,208 +1,97 @@
 # Implementation Status
 
-## Dashboard Pages - Full CRUD Implementation
+> **Authoritative inventory:** see [`Features.md`](./Features.md) for what exists and [`Test.md`](./Test.md) for what's verified. This document gives a high-level snapshot.
 
-All dashboard pages have been successfully implemented with full CRUD (Create, Read, Update, Delete) functionality.
+## Domain coverage
 
-### ✅ Completed Pages
+Each domain has a working page under `app/(dashboard)/` and a backing REST API under `app/api/`. CRUD on every entity is verified end-to-end by `tests/e2e/crud.spec.ts`; side-effect endpoints (completion flows, stats, exports, sync, etc.) are verified by `tests/e2e/side-effects.spec.ts`.
 
-#### 1. Habits Page (`/habits`)
-**Status:** Fully Functional
-- ✅ Create new habits with detailed configuration
-- ✅ Edit existing habits
-- ✅ Delete habits with confirmation
-- ✅ Mark habits as complete
-- ✅ Multiple views: Board, Calendar, Progress
-- ✅ Streak tracking
-- ✅ Category-based organization
-- ✅ Frequency settings (daily, weekly, custom)
-- ✅ Reminder time configuration
+| Domain | Page | API surface | E2E status |
+|---|---|---|---|
+| Tasks | `/tasks` (Board / List / Calendar / Timeline) | `/api/tasks`, `/api/tasks/[id]`, `/api/tasks/[id]/complete` | ✅ CRUD + soft-delete + dialog UI smoke |
+| Habits | `/habits` | `/api/habits`, `/api/habits/[id]`, `/api/habits/[id]/complete` | ✅ CRUD + completion side-effect |
+| Finance | `/finance` | `/api/transactions[/...]`, `/api/budgets[/...]`, `.../stats` | ✅ CRUD + duplicate-category 409 + dialog UI smoke |
+| Fitness | `/fitness` | `/api/exercises[/...]`, `/api/fitness-goals[/...]`, `/api/health-metrics`, `.../stats` | ✅ CRUD + upsert + `?withProgress=true` |
+| Nutrition | `/nutrition` | `/api/meals[/...]`, `/api/water[/...]`, `.../stats` | ✅ CRUD + nutrition stats |
+| Learning | `/learning` | `/api/learning/resources[/...]`, `.../stats` | ✅ CRUD + auto-`completedAt` + additive `timeInvested` |
+| Analytics | `/analytics` | `/api/analytics/{insights,overview,trends,reports}`, `/api/dashboard/overview`, `/api/achievements` | ✅ All endpoints respond + invalid type rejected |
+| Notifications | `/notifications` | `/api/notifications[/...]`, `/api/notifications/preferences` | ✅ List + markAllRead + 404 on unknown id + preferences validation |
+| Integrations | `/integrations` | `/api/integrations[/...]`, OAuth connect/callback/sync | ✅ List + 400 on bogus provider; OAuth flow not e2e-tested (requires real creds) |
+| Sync | (background) | `/api/sync/{queue,status,resolve-conflict}` | ✅ Apply CREATE op + status shape + non-array rejection |
+| Export / GDPR | (background) | `/api/export`, `/api/user/{export,data-retention,delete}` | ✅ JSON/CSV + invalid format + GDPR endpoints; `delete` excluded from e2e |
+| Cron | (background) | `/api/cron/{cleanup,metrics-aggregation}` | ✅ Reachable (200 if `CRON_SECRET` unset, 401 if set) |
+| Health | (public) | `/api/health` | ✅ DB + Redis + memory blocks present |
 
-**Components Used:**
-- `HabitBoard` - Kanban-style habit tracking
-- `HabitCalendar` - GitHub-style contribution calendar
-- `HabitProgress` - Progress charts and statistics
-- `HabitForm` - Create/edit habit form
+## Test verification status
 
-#### 2. Finance Page (`/finance`)
-**Status:** Fully Functional
-- ✅ Create transactions (income/expense)
-- ✅ Edit transactions
-- ✅ Delete transactions
-- ✅ Category-based filtering
-- ✅ Budget tracking with alerts
-- ✅ Financial dashboard with overview
-- ✅ Analytics charts (spending by category, monthly trends)
-- ✅ Transaction search and filters
-- ✅ Tag support
+| Layer | Tool | Suite | Last run on `--project=laptop` |
+|---|---|---|---|
+| Unit / property | Vitest + fast-check | `lib/**/__tests__/` | (run via `npm test`) |
+| E2E auth | Playwright | `tests/e2e/auth.spec.ts` | 4/4 |
+| E2E CRUD | Playwright | `tests/e2e/crud.spec.ts` | 14/14 |
+| E2E side-effects | Playwright | `tests/e2e/side-effects.spec.ts` | 37 passed, 1 `.fixme` (see Known issues) |
+| Per-page render | Playwright | `tests/e2e/functionality.spec.ts` | 11/11 |
+| Visual snapshots | Playwright | `tests/e2e/visual.spec.ts` | 2/2 |
 
-**Components Used:**
-- `FinancialDashboard` - Overview with key metrics
-- `TransactionList` - Searchable transaction list
-- `BudgetTracker` - Budget monitoring with progress bars
-- `FinancialCharts` - Visual analytics
-- `TransactionForm` - Create/edit transaction form
+Total e2e: **68 passed, 1 skipped** in ~5.8 min on a single laptop project.
 
-#### 3. Fitness Page (`/fitness`)
-**Status:** Fully Functional
-- ✅ Log exercises with details (type, duration, intensity, calories)
-- ✅ Delete exercise logs
-- ✅ Create fitness goals
-- ✅ Track goal progress
-- ✅ Delete goals
-- ✅ Record health metrics (weight, sleep, stress, energy)
-- ✅ Dashboard with weekly/monthly summaries
-- ✅ Exercise statistics
+## Bugs found and fixed in this iteration
 
-**Components Used:**
-- `FitnessDashboard` - Overview with stats
-- `ExerciseLog` - Exercise history
-- `FitnessGoals` - Goal creation and tracking
-- `HealthMetricsForm` - Health data entry
-- `ExerciseForm` - Log new exercises
+| Bug | Location | Fix |
+|---|---|---|
+| `TaskForm` shipped `dueDate: ''` to the API; Zod's `.datetime().optional()` rejects empty strings (always 400 when due date was empty) | `components/tasks/task-form.tsx` | `handleSubmit` omits empty `dueDate`; converts non-empty to ISO via `new Date(...).toISOString()` |
+| `TaskForm` and `TransactionForm` shipped the `<input type="datetime-local">` format (`YYYY-MM-DDTHH:mm`, no timezone); Zod's `.datetime()` requires a UTC offset (always 400 when a date was set) | `components/tasks/task-form.tsx`, `components/finance/transaction-form.tsx` | Convert to full ISO in `handleSubmit` before calling `onSubmit` |
+| `PATCH /api/notifications/[id]` returned 500 on unknown id instead of 404 (Prisma `update` throws `P2025`; the `if (!notification)` branch was dead code) | `lib/repositories/notification-repository.ts` | `markAsRead` does `findFirst` first, returns `null` if missing |
+| `PATCH /api/notifications/preferences` accepted `25:99` as quiet hours (regex was shape-only, not range-aware) | `app/api/notifications/preferences/route.ts` | Tightened regex to `^([01]\d\|2[0-3]):[0-5]\d$` |
 
-#### 4. Nutrition Page (`/nutrition`)
-**Status:** Fully Functional
-- ✅ Log meals with nutritional information
-- ✅ Delete meal logs
-- ✅ Track water intake
-- ✅ Quick water logging buttons
-- ✅ Daily nutrition dashboard
-- ✅ Meal type filtering (breakfast, lunch, dinner, snack)
-- ✅ Calorie and macro tracking
-- ✅ Statistics and trends
+## Known issues (not yet fixed)
 
-**Components Used:**
-- `NutritionDashboard` - Self-contained dashboard with tabs
-- `MealLog` - Meal history with filters
-- `MealForm` - Log new meals
-- `WaterTracker` - Water intake tracking
+| Issue | Impact | Required action |
+|---|---|---|
+| `prisma/schema.prisma` declares `DailyMetrics.date @unique` *and* `@@unique([userId, date])`. The standalone `@unique` lets only one user platform-wide own a metrics row per date. | Every user except the first to complete a task on a given date gets a 500 from `POST /api/tasks/[id]/complete`. Invisible in single-user dev; immediate failure under multi-user load or in e2e (where each run signs up a new user). | Drop the field-level `@unique` (keep the composite) → `npx prisma migrate dev --name fix_dailymetrics_unique` → drop `.fixme` from `tests/e2e/side-effects.spec.ts` |
 
-#### 5. Learning Page (`/learning`)
-**Status:** Fully Functional
-- ✅ Add learning resources (books, courses, certifications, articles)
-- ✅ Edit resources
-- ✅ Delete resources
-- ✅ Track progress percentage
-- ✅ Log time invested
-- ✅ Skill matrix
-- ✅ Learning analytics
-- ✅ Resource categorization
+## Cross-cutting features (verified by tests / configured in code)
 
-**Components Used:**
-- `LearningDashboard` - Self-contained dashboard
-- `ResourceList` - Resource management
-- `ResourceForm` - Add/edit resources
-- `SkillMatrix` - Skill tracking
-- `LearningCharts` - Progress visualization
+- **Auth**: NextAuth credentials provider, JWT 7-day expiry, bcrypt hashing, signup rate-limited 5/15 min/IP. Session-cookie–gated by `proxy.ts` (Next.js 16 middleware rename). Verified by `auth.spec.ts`.
+- **Data layer**: Prisma over PostgreSQL, repositories in `lib/repositories/*` are the only `prisma.*` callers. String-typed enums + JSON-encoded array fields per the convention in `CLAUDE.md`. Verified by every CRUD test.
+- **Errors**: Typed errors in `lib/error/*`, centralized via `handleApiError`. Correlation IDs threaded through logs and responses. Verified by negative-path tests in `side-effects.spec.ts`.
+- **Caching**: `lib/redis.ts` — gated by `ENABLE_REDIS`; cache calls become safe no-ops when disabled. Cache keys live in `lib/cache/repository-cache.ts`.
+- **Audit**: `auditLogger.logDataAccess` on mutating endpoints (`lib/logging/audit.ts`).
+- **Offline**: IndexedDB sync queue (`lib/offline/`) — server-side endpoints verified by `side-effects.spec.ts`; client-side reconciliation requires a real browser+offline scenario and is covered in `lib/offline/__tests__/` (Vitest).
+- **Security**: `lib/security/api-wrapper.ts` (`secureApiRoute`), rate limiting via `lib/security/rate-limit-middleware.ts`, GDPR via `lib/security/gdpr-compliance.ts` (export + delete-cascade).
 
-#### 6. Tasks Page (`/tasks`)
-**Status:** Fully Functional (Pre-existing)
-- ✅ Create tasks
-- ✅ Edit tasks
-- ✅ Delete tasks
-- ✅ Mark as complete
-- ✅ Multiple views: List, Board, Calendar, Timeline
-- ✅ Priority levels
-- ✅ Due dates
-- ✅ Tags
-- ✅ Workspace organization
+## Build status
 
-#### 7. Analytics Page (`/analytics`)
-**Status:** Fully Functional (Pre-existing)
-- ✅ Cross-domain insights
-- ✅ Achievement tracking
-- ✅ Trend analysis
-- ✅ Report generation
-- ✅ Metric cards
+✅ TypeScript builds cleanly
+✅ E2E suite green on `--project=laptop` (1 known `.fixme` for the schema bug)
+✅ React Compiler enabled (Next.js 16, React 19)
 
-### Common Features Across All Pages
+## Tech stack
 
-1. **Error Handling**
-   - Toast notifications for success/error states
-   - Confirmation dialogs for destructive actions
-   - Loading states during API calls
+| Concern | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| UI | React 19 with React Compiler, Tailwind CSS v4, Radix UI primitives |
+| State | Zustand (client), TanStack Query (server) |
+| Database | PostgreSQL via Prisma |
+| Auth | NextAuth.js (JWT, credentials, bcrypt) |
+| Validation | Zod (route bodies + form schemas) |
+| Cache | Redis (optional, gated) |
+| Tests | Vitest + fast-check (unit / property), Playwright (e2e) |
 
-2. **UI/UX**
-   - Responsive design
-   - Modal dialogs for forms
-   - Tab-based navigation
-   - Consistent styling with Tailwind CSS
-   - Accessible components
-
-3. **Data Management**
-   - Real-time UI updates after CRUD operations
-   - Optimistic UI updates where appropriate
-   - Proper state management with React hooks
-
-4. **API Integration**
-   - RESTful API endpoints
-   - Proper HTTP methods (GET, POST, PATCH, DELETE)
-   - JSON request/response handling
-
-### Build Status
-
-✅ **All TypeScript errors resolved**
-✅ **Build completes successfully**
-✅ **All pages properly typed**
-✅ **No runtime errors**
-
-### Next Steps (Optional Enhancements)
-
-1. **Testing**
-   - Add unit tests for components
-   - Add integration tests for API routes
-   - Add E2E tests for critical user flows
-
-2. **Performance**
-   - Implement pagination for large lists
-   - Add virtual scrolling for long lists
-   - Optimize bundle size
-
-3. **Features**
-   - Add export functionality for all data types
-   - Implement bulk operations
-   - Add advanced filtering and sorting
-   - Implement data visualization improvements
-
-4. **Mobile**
-   - Enhance mobile responsiveness
-   - Add touch gestures
-   - Optimize for smaller screens
-
-### Technical Stack
-
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI Components:** Custom component library
-- **State Management:** React Hooks
-- **Database:** Prisma ORM
-- **Authentication:** NextAuth.js
-
-### File Structure
+## Where things live
 
 ```
-app/(dashboard)/
-├── analytics/page.tsx       ✅ Fully functional
-├── finance/page.tsx         ✅ Fully functional
-├── fitness/page.tsx         ✅ Fully functional
-├── habits/page.tsx          ✅ Fully functional
-├── learning/page.tsx        ✅ Fully functional
-├── nutrition/page.tsx       ✅ Fully functional
-└── tasks/page.tsx           ✅ Fully functional
-
-components/
-├── analytics/               ✅ Complete
-├── finance/                 ✅ Complete
-├── fitness/                 ✅ Complete
-├── habits/                  ✅ Complete
-├── learning/                ✅ Complete
-├── nutrition/               ✅ Complete
-└── tasks/                   ✅ Complete
+app/(dashboard)/<domain>/page.tsx     # Authenticated pages
+app/api/<domain>/route.ts             # REST endpoints
+components/<domain>/*.tsx             # Domain components
+lib/repositories/<domain>-repository  # Only place that calls prisma.*
+prisma/schema.prisma                  # Source of truth for DB
+proxy.ts                              # Auth middleware (Next 16 rename)
+tests/e2e/*.spec.ts                   # Playwright suites
+Features.md / Test.md                 # Inventory + test plan
 ```
 
 ---
 
-**Last Updated:** December 2024
-**Status:** Production Ready ✅
+**Last verified:** 2026-04-29 (`npx playwright test --project=laptop` → 68 passed, 1 skipped)

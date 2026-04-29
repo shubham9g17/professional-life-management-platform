@@ -1,5 +1,7 @@
 # Project Setup Documentation
 
+> **Note (2026-04-29):** This document is a historical record of the original project bootstrap. It mentions SQLite and an early dependency snapshot. The project has since migrated to **PostgreSQL** (`prisma/schema.prisma` datasource = `postgresql`) and added a full Playwright e2e suite under `tests/e2e/`. For a current setup walkthrough, use [`./QUICK_START.md`](./QUICK_START.md). For the authoritative feature inventory and test mapping, see [`../Features.md`](../Features.md) and [`../Test.md`](../Test.md).
+
 ## Initial Setup Complete ✓
 
 This document tracks the completion of Task 1: Set up project foundation and core infrastructure.

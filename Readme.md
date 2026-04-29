@@ -1,6 +1,6 @@
 # Professional Life Management Platform
 
-> Enterprise-grade productivity and wellness application for working professionals. Built with Next.js 14+, TypeScript, and PostgreSQL.
+> Enterprise-grade productivity and wellness application for working professionals. Built with Next.js 16, React 19, TypeScript, and PostgreSQL.
 
 ## 🌟 Overview
 
@@ -23,8 +23,8 @@ The Professional Life Management Platform is a comprehensive web application des
 
 ### Prerequisites
 
-- **Node.js** 18+ 
-- **Database**: PostgreSQL (production) or SQLite (development)
+- **Node.js** 18+
+- **Database**: PostgreSQL (the Prisma datasource is `postgresql` — see `prisma/schema.prisma`)
 - **Redis**: Optional - can be disabled (see [No Redis Setup](./docs/NO_REDIS_SETUP.md))
 
 ### Installation
@@ -40,9 +40,8 @@ npm install
 # Set up environment variables
 cp .env.example .env
 
-# Configure your database URL in .env
-# For development with SQLite (default):
-DATABASE_URL="file:./dev.db"
+# Configure your database URL in .env (PostgreSQL):
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
 
 # Disable Redis for standalone operation (no external dependencies)
 ENABLE_REDIS="false"
@@ -50,7 +49,7 @@ ENABLE_REDIS="false"
 # Run database migrations
 npx prisma migrate dev
 
-# Start development server
+# Start development server (uses Turbopack via Next 16)
 npm run dev
 ```
 
@@ -60,12 +59,12 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 
 ### Core Technologies
 
-- **Frontend**: Next.js 14+ with React Server Components, TypeScript
-- **UI Framework**: Tailwind CSS with custom design system, Radix UI primitives
-- **State Management**: Zustand (client state), React Query (server state)
-- **Database**: PostgreSQL with Prisma ORM (SQLite for development)
-- **Authentication**: NextAuth.js with secure session management
-- **Testing**: Vitest with fast-check for property-based testing
+- **Frontend**: Next.js 16 (App Router, Turbopack), React 19 with React Compiler enabled, TypeScript
+- **UI Framework**: Tailwind CSS v4 with custom design system, Radix UI primitives
+- **State Management**: Zustand (client state), TanStack Query (server state)
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js with JWT sessions (7-day expiry, bcrypt password hashing)
+- **Testing**: Vitest + fast-check (unit / property-based, scoped to `lib/**`); Playwright (e2e)
 
 ### Optional Services
 
@@ -77,46 +76,41 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 
 ```
 professional-life-management-platform/
-├── app/                      # Next.js app directory
-│   ├── api/                 # API routes
-│   │   ├── auth/           # Authentication endpoints
-│   │   ├── tasks/          # Task management
-│   │   ├── habits/         # Habit tracking
-│   │   ├── transactions/   # Financial tracking
-│   │   ├── exercises/      # Fitness tracking
-│   │   ├── meals/          # Nutrition tracking
-│   │   ├── learning/       # Learning resources
-│   │   ├── analytics/      # Analytics & insights
-│   │   ├── health/         # Health check endpoint
-│   │   └── cron/           # Scheduled jobs
-│   ├── auth/               # Authentication pages
-│   ├── dashboard/          # Main dashboard
-│   └── ...                 # Other pages
-├── components/              # React components
-│   ├── analytics/          # Analytics components
-│   ├── dashboard/          # Dashboard widgets
-│   ├── finance/            # Financial components
-│   ├── fitness/            # Fitness components
-│   ├── habits/             # Habit tracking components
-│   ├── tasks/              # Task management components
-│   ├── ui/                 # Reusable UI components
-│   └── ...                 # Other components
-├── lib/                     # Utility functions & configurations
-│   ├── analytics/          # Analytics engine
-│   ├── auth/               # Authentication utilities
-│   ├── cache/              # Caching layer
-│   ├── error/              # Error handling
-│   ├── logging/            # Logging system
-│   ├── notifications/      # Notification service
-│   ├── offline/            # Offline support
-│   ├── repositories/       # Data access layer
-│   ├── security/           # Security utilities
-│   └── ...                 # Other utilities
-├── prisma/                  # Database schema & migrations
-├── docs/                    # Documentation
-├── scripts/                 # Utility scripts
-├── monitoring/              # Monitoring configuration
-└── test/                    # Test setup & utilities
+├── app/                          # Next.js App Router
+│   ├── (dashboard)/              # Authenticated route group (sidebar+header layout)
+│   │   ├── dashboard/            # Main dashboard
+│   │   ├── tasks/                # Task management (Board / List / Calendar / Timeline)
+│   │   ├── habits/               # Habit tracking
+│   │   ├── finance/              # Transactions + budgets
+│   │   ├── fitness/              # Exercises + goals + health metrics
+│   │   ├── nutrition/            # Meals + water
+│   │   ├── learning/             # Learning resources + skills
+│   │   ├── analytics/            # Cross-domain insights + achievements
+│   │   ├── integrations/         # Third-party connectors
+│   │   └── notifications/        # Notifications + preferences
+│   ├── api/                      # REST API routes (one folder per domain)
+│   ├── auth/                     # Sign-in / sign-up pages
+│   └── ...
+├── components/                   # React components, grouped by domain
+├── lib/                          # Cross-cutting modules
+│   ├── auth/                     # NextAuth config + helpers
+│   ├── cache/                    # Repository cache keys
+│   ├── error/                    # AppError, handleApiError
+│   ├── integrations/             # OAuth + export service
+│   ├── logging/                  # Logger + correlation IDs + audit log
+│   ├── offline/                  # IndexedDB sync queue (client) + reconciliation
+│   ├── repositories/             # Only place that calls prisma.*
+│   ├── security/                 # api-wrapper, rate limit, GDPR
+│   └── ...
+├── prisma/                       # schema.prisma + migrations
+├── proxy.ts                      # Next 16 auth middleware (renamed from middleware.ts)
+├── tests/e2e/                    # Playwright suites (auth, crud, side-effects, functionality, visual)
+├── test/                         # Vitest setup
+├── docs/                         # Operational/dev documentation
+├── Features.md                   # Feature inventory (every page, every endpoint)
+├── Test.md                       # Test plan (maps every feature to its spec)
+├── scripts/                      # Utility scripts
+└── monitoring/                   # Monitoring configuration
 ```
 
 ## 📚 Documentation
@@ -127,6 +121,11 @@ professional-life-management-platform/
 - **[Setup Guide](./docs/SETUP.md)** - Detailed installation and configuration
 - **[No Redis Setup](./docs/NO_REDIS_SETUP.md)** - Run without external dependencies
 - **[Database Schema](./docs/DATABASE_SCHEMA.md)** - Database structure and relationships
+
+### Feature Inventory & Test Coverage
+
+- **[Features.md](./Features.md)** - Authoritative feature inventory: every page, every API endpoint, every cross-cutting concern
+- **[Test.md](./Test.md)** - Test plan that maps each feature to its spec, plus an honest "out-of-scope" section
 
 ### Development
 
@@ -161,9 +160,8 @@ professional-life-management-platform/
 Create a `.env` file based on `.env.example`:
 
 ```env
-# Database
-DATABASE_URL="file:./dev.db"  # SQLite for development
-# DATABASE_URL="postgresql://user:password@host:5432/dbname"  # PostgreSQL for production
+# Database (PostgreSQL — the only supported datasource)
+DATABASE_URL="postgresql://user:password@host:5432/dbname"
 
 # Authentication
 NEXTAUTH_URL="http://localhost:3000"
@@ -194,26 +192,51 @@ openssl rand -base64 32
 
 ## 🧪 Testing
 
+The project has two test layers: **Vitest** for unit / property-based tests in `lib/**`, and **Playwright** for end-to-end suites under `tests/e2e/`.
+
+### Vitest (unit / property)
+
 ```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with UI
-npm run test:ui
-
-# Run tests with coverage
-npm run test:coverage
+npm test                  # one-shot run
+npm run test:watch        # watch mode
+npm run test:ui           # Vitest UI
+npm run test:coverage     # v8 coverage; only `lib/**` is included
 ```
+
+### Playwright (e2e)
+
+```bash
+# Start the dev server in one terminal
+npm run dev
+
+# In another terminal — run all e2e suites on the laptop project
+npx playwright test --project=laptop
+
+# Run a single spec
+npx playwright test crud.spec.ts --project=laptop
+
+# Run on every viewport (mobile / tablet / laptop / big-screen) — note: auth/crud/side-effects
+# specs are skipped on non-laptop projects to avoid 4× DB churn and signup rate-limit issues
+npx playwright test
+```
+
+The Playwright suite covers:
+
+| Spec | Coverage |
+|---|---|
+| `tests/e2e/auth.spec.ts` | Sign-in/up, protected-route redirect |
+| `tests/e2e/crud.spec.ts` | Create/Read/Update/Delete on every domain entity, plus 3 UI smokes for forms |
+| `tests/e2e/side-effects.spec.ts` | Completion side-effects, achievements, notifications, sync, analytics, stats, dashboard, exports, GDPR, cron, health |
+| `tests/e2e/functionality.spec.ts` | Per-page render smoke + console-error budget |
+| `tests/e2e/visual.spec.ts` | Per-viewport visual snapshots |
+
+A one-time `tests/e2e/global-setup.ts` signs up a fresh test user per run and persists the session as `tests/e2e/.auth/state.json`, so every spec inherits an authenticated browser context. See **[Test.md](./Test.md)** for the per-feature mapping and known issues.
 
 ### Testing Strategy
 
-- **Unit Tests**: Verify specific functionality and edge cases
-- **Property-Based Tests**: Verify universal properties using fast-check
-- **Integration Tests**: Verify module interactions
-- **E2E Tests**: Verify complete user workflows
+- **Unit Tests** (Vitest, `lib/**/__tests__/`): repositories, error handling, validation
+- **Property-Based Tests** (Vitest + fast-check): invariants on data transformations
+- **End-to-End Tests** (Playwright, `tests/e2e/`): real HTTP against the running app, real DB, real auth
 
 ## 🚢 Deployment
 
@@ -271,7 +294,7 @@ See [Deployment Guide](./docs/DEPLOYMENT.md) for detailed instructions.
 ### Health Check
 
 ```bash
-curl https://your-domain.com/health
+curl https://your-domain.com/api/health
 ```
 
 Expected response:
@@ -288,7 +311,7 @@ Expected response:
 
 ### Monitoring Tools
 
-- **Health Endpoint**: `/health` - System health status
+- **Health Endpoint**: `/api/health` - System health status (database + Redis + memory)
 - **Error Tracking**: Sentry integration (optional)
 - **APM**: New Relic, Datadog (optional)
 - **Uptime Monitoring**: UptimeRobot, Pingdom (optional)

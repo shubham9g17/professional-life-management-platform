@@ -348,7 +348,7 @@ volumes:
 Check the health endpoint:
 
 ```bash
-curl https://your-domain.com/health
+curl https://your-domain.com/api/health
 ```
 
 Expected response:

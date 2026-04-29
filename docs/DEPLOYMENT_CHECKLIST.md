@@ -6,10 +6,11 @@ Use this checklist before deploying to production to ensure all requirements are
 
 ### Code Quality
 
-- [ ] All tests passing (`npm test`)
+- [ ] Vitest unit/property tests passing (`npm test`)
+- [ ] Playwright e2e suite passing on `--project=laptop` (requires local `npm run dev`). See [`../Test.md`](../Test.md) for the per-feature mapping. Note: one test (`Tasks completion side-effects`) is currently `.fixme` due to the documented `DailyMetrics.date @unique` schema bug — confirm the migration has been applied before treating this as green.
 - [ ] No TypeScript errors (`npx tsc --noEmit`)
 - [ ] No linting errors (`npm run lint`)
-- [ ] Code coverage > 80% for critical paths
+- [ ] Code coverage > 80% for critical paths in `lib/**`
 - [ ] All property-based tests passing
 - [ ] Code reviewed and approved by at least one team member
 - [ ] No console.log statements in production code
@@ -77,7 +78,7 @@ Use this checklist before deploying to production to ensure all requirements are
 
 ### Monitoring & Observability
 
-- [ ] Health check endpoint working (`/health`)
+- [ ] Health check endpoint working (`/api/health`)
 - [ ] Error tracking configured (Sentry or similar)
 - [ ] Application performance monitoring configured
 - [ ] Uptime monitoring configured (UptimeRobot or similar)
@@ -173,7 +174,7 @@ Use this checklist before deploying to production to ensure all requirements are
 
 ### 4. Post-Deployment Verification
 
-- [ ] Health check passes: `curl https://your-domain.com/health`
+- [ ] Health check passes: `curl https://your-domain.com/api/health`
 - [ ] Version endpoint returns correct version
 - [ ] Test critical user flows:
   - [ ] User registration
