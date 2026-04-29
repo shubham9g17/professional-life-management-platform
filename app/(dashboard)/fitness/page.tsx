@@ -10,6 +10,23 @@ import { FitnessGoals } from '@/components/fitness/fitness-goals'
 import { HealthMetricsForm } from '@/components/fitness/health-metrics-form'
 import { useToast } from '@/hooks/use-toast'
 
+function mode<T>(values: Array<T | null | undefined>): T | null {
+  const counts = new Map<T, number>()
+  for (const v of values) {
+    if (v == null) continue
+    counts.set(v, (counts.get(v) ?? 0) + 1)
+  }
+  let best: T | null = null
+  let bestCount = 0
+  for (const [v, c] of counts) {
+    if (c > bestCount) {
+      best = v
+      bestCount = c
+    }
+  }
+  return best
+}
+
 export default function FitnessPage() {
   const [exercises, setExercises] = useState<any[]>([])
   const [goals, setGoals] = useState<any[]>([])
@@ -31,17 +48,17 @@ export default function FitnessPage() {
 
       if (exercisesRes.ok) {
         const data = await exercisesRes.json()
-        setExercises(data.exercises || [])
-        
-        // Calculate stats
-        const totalMinutes = data.exercises?.reduce((sum: number, e: any) => sum + e.duration, 0) || 0
-        const totalCalories = data.exercises?.reduce((sum: number, e: any) => sum + (e.caloriesBurned || 0), 0) || 0
+        const exercises = data.exercises || []
+        setExercises(exercises)
+
+        const totalMinutes = exercises.reduce((sum: number, e: any) => sum + e.duration, 0)
+        const totalCalories = exercises.reduce((sum: number, e: any) => sum + (e.caloriesBurned || 0), 0)
         setStats({
-          totalExercises: data.exercises?.length || 0,
+          totalExercises: exercises.length,
           totalMinutes,
           totalCalories,
-          averageIntensity: 'MODERATE',
-          mostCommonActivity: 'Running',
+          averageIntensity: mode(exercises.map((e: any) => e.intensity)),
+          mostCommonActivity: mode(exercises.map((e: any) => e.activityType)),
           weeklyMinutes: totalMinutes,
           monthlyMinutes: totalMinutes,
         })

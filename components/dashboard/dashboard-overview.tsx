@@ -299,7 +299,7 @@ export function DashboardOverview() {
         </BentoCard>
 
         {/* Quick actions */}
-        <BentoCard span="1x1" index={6} className="p-0">
+        <BentoCard span="1x1" index={6} className="p-0 sm:col-span-2 lg:col-span-1">
           <QuickActionsWidget />
         </BentoCard>
       </BentoGrid>

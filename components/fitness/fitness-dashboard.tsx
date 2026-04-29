@@ -74,11 +74,11 @@ export function FitnessDashboard({ stats, latestMetrics }: FitnessDashboardProps
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Average Intensity</p>
-            <p className="text-2xl font-semibold">{stats.averageIntensity}</p>
+            <p className="text-2xl font-semibold">{stats.averageIntensity ?? '—'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">Most Common Activity</p>
-            <p className="text-2xl font-semibold">{stats.mostCommonActivity}</p>
+            <p className="text-2xl font-semibold">{stats.mostCommonActivity ?? '—'}</p>
           </div>
         </div>
       </div>

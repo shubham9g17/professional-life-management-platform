@@ -153,26 +153,32 @@ export function NutritionDashboard() {
               {/* Meals by Type */}
               <div className="bg-white border rounded-lg p-6">
                 <h3 className="text-lg font-semibold mb-4">Meals by Type</h3>
-                <div className="space-y-3">
-                  {Object.entries(stats.mealsByType).map(([type, count]) => (
-                    <div key={type} className="flex items-center justify-between">
-                      <span className="text-gray-700 capitalize">
-                        {type.toLowerCase()}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-500 h-2 rounded-full"
-                            style={{
-                              width: `${(count / stats.totalMeals) * 100}%`,
-                            }}
-                          />
+                {Object.keys(stats.mealsByType).length === 0 || stats.totalMeals === 0 ? (
+                  <p className="text-sm text-gray-500">
+                    No meals logged yet. Use “Log Meal” to start tracking.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {Object.entries(stats.mealsByType).map(([type, count]) => (
+                      <div key={type} className="flex items-center justify-between">
+                        <span className="text-gray-700 capitalize">
+                          {type.toLowerCase()}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-32 bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-500 h-2 rounded-full"
+                              style={{
+                                width: `${(count / stats.totalMeals) * 100}%`,
+                              }}
+                            />
+                          </div>
+                          <span className="font-medium w-8 text-right">{count}</span>
                         </div>
-                        <span className="font-medium w-8 text-right">{count}</span>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Macros Summary */}
