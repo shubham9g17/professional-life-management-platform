@@ -24,7 +24,7 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile',
-      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts'],
+      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts', '**/demo/**'],
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 375, height: 667 },
@@ -33,7 +33,7 @@ export default defineConfig({
     },
     {
       name: 'tablet',
-      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts'],
+      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts', '**/demo/**'],
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },
@@ -42,12 +42,26 @@ export default defineConfig({
     },
     {
       name: 'laptop',
+      testIgnore: ['**/demo/**'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
     },
     {
       name: 'big-screen',
-      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts'],
+      testIgnore: ['**/auth.spec.ts', '**/crud.spec.ts', '**/side-effects.spec.ts', '**/demo/**'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } },
+    },
+    {
+      name: 'demo',
+      testMatch: /demo\/walkthrough\.spec\.ts/,
+      timeout: 10 * 60 * 1000,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 800 },
+        video: 'on',
+        trace: 'off',
+        screenshot: 'off',
+        launchOptions: { slowMo: 200 },
+      },
     },
   ],
 })
