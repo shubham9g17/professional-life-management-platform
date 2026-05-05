@@ -82,10 +82,13 @@ This file is the source of truth that `Test.md` maps coverage against.
 
 | Feature | Surface |
 |---|---|
-| Cross-domain insights | `GET /api/analytics/insights` |
-| Aggregate overview | `GET /api/analytics/overview` |
-| Trend series | `GET /api/analytics/trends` |
-| Generated reports | `GET /api/analytics/reports` |
+| Cross-domain insights | `GET /api/analytics/insights?days=7\|30\|90` |
+| Aggregate overview (period-aware: today + period-average sub-scores + period totals) | `GET /api/analytics/overview?days=7\|30\|90` |
+| Trend series | `GET /api/analytics/trends?days=` (1–365) |
+| **Per-domain stats grid** (composes `task`/`transaction`/`exercise`/`health-metric`/`learning`/`habit`/`meal`/`water-intake` repos into one payload for the analytics page) | `GET /api/analytics/domains?days=7\|30\|90` |
+| **Cross-domain correlations** (5 fixed group-by-mean comparisons over `DailyMetrics`: prod vs. exercise≥30, prod vs. full-streak day, wellness vs. nutrition tracked, wellness vs. water goal, growth vs. learning>0; min-sample 3 per side) | `GET /api/analytics/correlations?days=7\|30\|90` |
+| Generated reports (weekly/monthly) | `GET /api/analytics/reports?type=weekly\|monthly` |
+| **Report CSV export** (server-rendered CSV with `Content-Disposition: attachment`) | `GET /api/analytics/reports/export?type=weekly\|monthly` |
 | Dashboard overview (parallel queries: tasks/habits/exercise/meals/water/learning/transactions/dailyMetrics + 10-item recent-activity feed) | `GET /api/dashboard/overview` |
 | List achievements | `GET /api/achievements?limit=` |
 | Create achievement (typically system-triggered) | `POST /api/achievements` (`type`, `title`, `description`, `category` ∈ `PRODUCTIVITY`/`WELLNESS`/`GROWTH`/`FINANCIAL`) |

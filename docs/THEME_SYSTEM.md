@@ -31,10 +31,71 @@ A comprehensive theme system and UI component library has been implemented for t
 #### Global Styles
 - **Location**: `app/globals.css`
 - **Features**:
-  - CSS variables for light and dark themes
-  - Smooth theme transitions
+  - CSS variables for light and dark themes (see [Token reference](#token-reference) below)
+  - Smooth theme transitions (scoped to a single `[data-theme-transition]` attribute on `<html>`, set only at toggle — avoids a permanent transition on every hover/focus)
   - Reduced motion support
   - Professional animations (fade-in, slide-in, slide-up, scale-in)
+  - `.bento-card` surface helper (see [Surface depth](#surface-depth) below)
+
+## Surface depth
+
+The platform uses two card primitives that need to look identical on the page:
+
+| Primitive | Where | Implementation |
+|---|---|---|
+| `<BentoCard>` React component | `components/dashboard/bento-card.tsx` | `border + bg-card + shadow-sm` + a subtle `before:bg-gradient-to-br from-foreground/[0.03]` overlay; entrance animation via Framer Motion. |
+| `.bento-card` CSS class | `app/globals.css` | `border + background + box-shadow` (light mode only). Used directly in 27 module files where the React wrapper would be overkill. |
+
+**Why both have to ship a shadow:** in light mode the page background (`--background`) and card surface (`--card`) differ by only ~10/255. The 1px border alone is too faint to give the card visible elevation, so the `.bento-card` class adds a soft `box-shadow` in light mode. In dark mode the brightness step between page (#09090b) and card (#18181b) does the work on its own, and a shadow there reads as a smudge — so `.dark .bento-card { box-shadow: none }` suppresses it.
+
+```css
+.bento-card {
+  position: relative;
+  border-radius: var(--card-radius);
+  background: rgb(var(--card));
+  border: 1px solid rgb(var(--border));
+  box-shadow:
+    0 1px 2px 0 rgb(15 23 42 / 0.04),
+    0 1px 3px 0 rgb(15 23 42 / 0.06);
+}
+
+.dark .bento-card { box-shadow: none; }
+```
+
+If you create a new card-like surface, prefer one of these two primitives so light/dark stays coherent. Don't reach for raw `bg-white` + custom shadow.
+
+## Token reference
+
+All tokens are RGB triplets so they compose cleanly with Tailwind opacity utilities (e.g. `bg-card/80`).
+
+### Light theme
+
+| Token | Value | Notes |
+|---|---|---|
+| `--background` | `244 246 251` | Page bg. Slightly cooler than card to give cards visible elevation. |
+| `--card` | `255 255 255` | Pure white card surface. |
+| `--foreground` | `15 23 42` | Slate-900 — primary text on card and page. |
+| `--muted` | `238 242 248` | Input bg, hover, badge bg, skeleton boxes. |
+| `--muted-foreground` | `90 105 130` | Secondary text on cards (slightly cooler/darker than slate-500 for legibility). |
+| `--border` / `--input` | `215 222 235` | Strong enough to define cards without going Material-heavy. |
+| `--primary` | `79 70 229` | Indigo-600. |
+| `--success` / `--warning` / `--destructive` | `22 163 74` / `234 88 12` / `239 68 68` | |
+| `--chart-1..5` | indigo / sky / green / orange / pink | Used for dashboard KPI tints and trend chart strokes. |
+
+### Dark theme
+
+| Token | Value | Notes |
+|---|---|---|
+| `--background` | `9 9 11` | Near-black page. |
+| `--card` | `24 24 27` | One stop brighter than page — provides surface contrast without shadows. |
+| `--foreground` | `250 250 250` | |
+| `--muted` / `--accent` | `39 39 42` | |
+| `--muted-foreground` | `161 161 170` | |
+| `--border` / `--input` | `39 39 42` | Same as muted — borders are visual hinges, not separators. |
+| `--primary` | `129 140 248` | Indigo-400 (lighter for dark bg legibility). |
+| `--chart-1..5` | indigo-400 / sky-400 / green-400 / orange-400 / pink-400 | Color family preserved, brightness raised. |
+
+When you need to read a color in JS or pass it to Recharts, use `getComputedStyle(document.documentElement).getPropertyValue('--chart-3')` and wrap the result in `rgb(...)`.
 
 #### Theme Toggle Component
 - **Location**: `components/ui/theme-toggle.tsx`

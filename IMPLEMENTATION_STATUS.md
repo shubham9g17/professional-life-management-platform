@@ -14,7 +14,7 @@ Each domain has a working page under `app/(dashboard)/` and a backing REST API u
 | Fitness | `/fitness` | `/api/exercises[/...]`, `/api/fitness-goals[/...]`, `/api/health-metrics`, `.../stats` | ✅ CRUD + upsert + `?withProgress=true` |
 | Nutrition | `/nutrition` | `/api/meals[/...]`, `/api/water[/...]`, `.../stats` | ✅ CRUD + nutrition stats |
 | Learning | `/learning` | `/api/learning/resources[/...]`, `.../stats` | ✅ CRUD + auto-`completedAt` + additive `timeInvested` |
-| Analytics | `/analytics` | `/api/analytics/{insights,overview,trends,reports}`, `/api/dashboard/overview`, `/api/achievements` | ✅ All endpoints respond + invalid type rejected |
+| Analytics | `/analytics` (single-scroll: hero + trends + per-domain grid + correlations + insights/achievements + report dialog) | `/api/analytics/{insights,overview,trends,reports,domains,correlations}` (all accept `?days=7\|30\|90`), `/api/analytics/reports/export` (CSV), `/api/dashboard/overview`, `/api/achievements` | ✅ Existing endpoints respond + invalid type rejected; `domains`, `correlations`, `reports/export` are not yet covered by e2e |
 | Notifications | `/notifications` | `/api/notifications[/...]`, `/api/notifications/preferences` | ✅ List + markAllRead + 404 on unknown id + preferences validation |
 | Integrations | `/integrations` | `/api/integrations[/...]`, OAuth connect/callback/sync | ✅ List + 400 on bogus provider; OAuth flow not e2e-tested (requires real creds) |
 | Sync | (background) | `/api/sync/{queue,status,resolve-conflict}` | ✅ Apply CREATE op + status shape + non-array rejection |
@@ -34,6 +34,15 @@ Each domain has a working page under `app/(dashboard)/` and a backing REST API u
 | Visual snapshots | Playwright | `tests/e2e/visual.spec.ts` | 2/2 |
 
 Total e2e: **68 passed, 1 skipped** in ~5.8 min on a single laptop project.
+
+## Design system polish
+
+| Change | Where | Why |
+|---|---|---|
+| `.bento-card` CSS class now ships with a light-mode `box-shadow` (suppressed in dark mode via `.dark .bento-card { box-shadow: none }`) | `app/globals.css` | Two card systems coexisted: the `<BentoCard>` React component had `shadow-sm` + a gradient overlay, but the `.bento-card` CSS class (used in 27 files) had nothing — so analytics/per-module cards looked flat in light mode while dashboard cards looked layered. Now both have visible elevation. |
+| Light-mode tokens retuned: `--background` 250→244, `--border` 226→215, `--muted` 241→238, `--muted-foreground` 100→90 | `app/globals.css` | Page bg and card bg differed by only 5/255, and the border at 226 was too faint to compensate. Cards now stand off the page without changing the overall aesthetic. Dark-mode tokens untouched. |
+| Sidebar surface changed `bg-card/40` → `bg-card` | `components/layout/dashboard-layout.tsx` | 40% white over near-white was invisible in light mode. |
+| Orphan `ExerciseForm` wired into `/fitness` Exercises tab (collapsible inline form + POST `/api/exercises`) | `app/(dashboard)/fitness/page.tsx`, `components/fitness/exercise-form.tsx` | Form component existed but page never imported it — no UI to log exercises. Hard-coded `border-gray-300` / `focus:ring-blue-500` also replaced with `border-input` / `focus:ring-ring`. |
 
 ## Bugs found and fixed in this iteration
 

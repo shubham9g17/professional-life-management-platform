@@ -1,250 +1,128 @@
 # Analytics Module
 
-The Analytics module provides comprehensive insights into user productivity, wellness, and growth through data-driven metrics, visualizations, and intelligent recommendations.
+The Analytics module surfaces cross-domain insights — productivity / wellness / growth scores, per-domain stats, cross-domain correlations, achievements, and exportable reports — through a single scrolling page at `/analytics`.
+
+## Page layout
+
+`app/(dashboard)/analytics/page.tsx` is the entry point. It owns the period state (`7 | 30 | 90` days, default 30) and passes it down to every section. There is no longer a `<AnalyticsDashboard />` orchestrator; the page composes the sections directly:
+
+```
+┌──────────────────────────────────────────────────┐
+│ Header + period toggle (7d / 30d / 90d)          │
+│ Hero (overall score + Δ vs period avg + sparks + │
+│        4 activity counts)                        │
+│ TrendCharts (overall area + sub-score lines)     │
+│ DomainStatsGrid (Tasks/Habits/Finance/Fitness/   │
+│                  Nutrition/Learning — 6 cards)   │
+│ CorrelationPanel (3–5 group-by-mean comparisons) │
+│ Insights + Achievements (2-column)               │
+│ Generate Report → opens ReportGenerator dialog   │
+└──────────────────────────────────────────────────┘
+```
+
+Each section fetches independently against its own endpoint; the period toggle re-fetches every section on change.
 
 ## Components
 
-### AnalyticsDashboard
-Main dashboard component that orchestrates all analytics features.
+### `DomainStatsGrid` — `domain-stats-grid.tsx`
 
-**Features:**
-- Real-time score display (Productivity, Wellness, Growth, Overall)
-- Today's activity summary
-- Personalized insights and recommendations
-- Historical trend visualization
-- Recent achievements display
-- Report generation
+6 cards (Tasks, Habits, Finance, Fitness, Nutrition, Learning), each rendering one primary KPI plus 2–3 supporting rows.
 
-**Usage:**
-```tsx
-import { AnalyticsDashboard } from '@/components/analytics'
+**Props:** `{ days: number }`
 
-export default function AnalyticsPage() {
-  return <AnalyticsDashboard />
-}
-```
+**Endpoint:** `GET /api/analytics/domains?days=`
 
-### MetricCardsGrid
-Displays key performance indicators in a grid layout.
+### `CorrelationPanel` — `correlation-panel.tsx`
 
-**Props:**
-- `productivityScore`: number (0-100)
-- `wellnessScore`: number (0-100)
-- `growthScore`: number (0-100)
-- `overallScore`: number (0-100)
+Up to 5 cards, each phrasing a comparison as "on days you X, your Y is Z% higher" with `TrendingUp` / `TrendingDown` / `Minus` icon (5 % threshold for direction). Cards include both With/Without bars and the day count for each side. Hides itself when no comparison has ≥ 3 days on each side.
 
-### TrendCharts
-Visualizes historical score trends over time.
+**Props:** `{ days: number }`
 
-**Props:**
-- `data`: Array of trend data points
-- `isLoading`: boolean (optional)
+**Endpoint:** `GET /api/analytics/correlations?days=`
 
-### InsightPanel
-Displays AI-generated insights and recommendations.
+### `TrendCharts` — `trend-charts.tsx`
 
-**Props:**
-- `insights`: Array of insight objects
-- `isLoading`: boolean (optional)
+Overall-score area chart + Productivity / Wellness / Growth line chart. Period-aware via the `days` prop.
 
-**Insight Types:**
-- `POSITIVE`: Celebrating achievements and good performance
-- `IMPROVEMENT`: Suggesting areas for growth
-- `NEUTRAL`: General observations and information
+**Props:** `{ days: number }`
 
-### ReportGenerator
-Generates weekly or monthly performance reports.
+**Endpoint:** `GET /api/analytics/trends?days=`
 
-**Props:**
-- `onGenerate`: Function to generate report data
+### `InsightPanel` — `insight-panel.tsx`
 
-**Features:**
-- Weekly and monthly report types
-- Comprehensive activity summaries
-- Average score calculations
-- Export capabilities (PDF, CSV)
+AI-generated insights (POSITIVE / IMPROVEMENT / NEUTRAL).
 
-### AchievementDisplay
-Shows unlocked achievements with category badges.
+**Props:** `{ insights, isLoading? }`
 
-**Props:**
-- `achievements`: Array of achievement objects
-- `isLoading`: boolean (optional)
-- `limit`: number (optional) - Limit displayed achievements
+**Endpoint:** `GET /api/analytics/insights?days=`
 
-## API Endpoints
+### `AchievementDisplay` — `achievement-display.tsx`
 
-### GET /api/analytics/overview
-Returns dashboard overview with current scores and key metrics.
+Compact mode on the page (limit ~4 with "View all" → opens a dialog rendering the full gallery).
 
-**Response:**
-```json
-{
-  "currentScores": {
-    "productivityScore": 75.5,
-    "wellnessScore": 82.3,
-    "growthScore": 68.9,
-    "overallScore": 76.2
-  },
-  "today": {
-    "tasksCompleted": 5,
-    "habitsCompleted": 3,
-    "exerciseMinutes": 45,
-    "learningMinutes": 30
-  },
-  "weeklyAverages": { ... },
-  "monthlyTotals": { ... }
-}
-```
+**Props:** `{ achievements, isLoading?, limit?, onViewAll? }`
 
-### GET /api/analytics/trends
-Returns historical trend data for charts.
+**Endpoint:** `GET /api/achievements?limit=`
 
-**Query Parameters:**
-- `days`: number (default: 30, max: 365)
+### `ReportGenerator` — `report-generator.tsx`
 
-**Response:**
-```json
-{
-  "trends": [
-    {
-      "date": "2024-01-01",
-      "productivityScore": 75,
-      "wellnessScore": 80,
-      "growthScore": 70,
-      "overallScore": 75
-    }
-  ],
-  "period": { ... }
-}
-```
+Mounted inside a `Dialog`. Generates a weekly or monthly report and renders an "Export CSV" link that hits the export route directly (`<a download>` rather than fetch+blob).
 
-### GET /api/analytics/insights
-Returns AI-generated insights and recommendations.
+**Props:** `{ onGenerate: (type) => Promise<{ report }> }`
 
-**Response:**
-```json
-{
-  "insights": [
-    {
-      "type": "POSITIVE",
-      "category": "PRODUCTIVITY",
-      "title": "Excellent Productivity",
-      "description": "You're maintaining a strong productivity score...",
-      "metric": 85
-    }
-  ],
-  "generatedAt": "2024-01-01T00:00:00Z"
-}
-```
+**Endpoint:** `GET /api/analytics/reports?type=` (preview); `GET /api/analytics/reports/export?type=` (CSV download).
 
-### GET /api/analytics/reports
-Generates weekly or monthly summary reports.
+### `MetricCardsGrid` — `metric-cards.tsx`
 
-**Query Parameters:**
-- `type`: "weekly" | "monthly"
+Used inside the hero to render the three sub-scores (Productivity / Wellness / Growth). Receives raw numbers — does not fetch.
 
-**Response:**
-```json
-{
-  "type": "weekly",
-  "report": {
-    "period": { ... },
-    "totals": { ... },
-    "averages": { ... },
-    "daysTracked": 7
-  },
-  "generatedAt": "2024-01-01T00:00:00Z"
-}
-```
+## API endpoints
 
-### GET /api/achievements
-Returns user achievements.
+All accept `?days=7|30|90` (default 30) unless noted.
 
-**Query Parameters:**
-- `limit`: number (optional)
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/analytics/overview` | Period-aware: `currentScores`, `today`, `periodAverages`, `periodTotals`, `period`, `daysWithData`. |
+| `GET /api/analytics/trends` | Daily score series (`days` may be 1–365). |
+| `GET /api/analytics/insights` | Generated insights for the period. |
+| `GET /api/analytics/domains` | One composed payload covering all six domain stat cards. Avoids N parallel calls from the page. |
+| `GET /api/analytics/correlations` | 5 fixed group-by-mean comparisons over `DailyMetrics` (see below). Each result includes `withCount` / `withoutCount`; results with either side < 3 days are dropped. |
+| `GET /api/analytics/reports?type=weekly\|monthly` | Report preview (JSON). |
+| `GET /api/analytics/reports/export?type=weekly\|monthly` | Same data as CSV with `Content-Disposition: attachment; filename="analytics-{type}-{date}.csv"`. |
+| `GET /api/achievements?limit=` | Unlocked achievements. |
 
-**Response:**
-```json
-{
-  "achievements": [
-    {
-      "id": "...",
-      "type": "STREAK_7",
-      "title": "Week Warrior",
-      "description": "Completed habits for 7 consecutive days",
-      "category": "WELLNESS",
-      "unlockedAt": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "total": 10
-}
-```
+### Correlations — what's compared
 
-## Metrics Engine
+Implemented in `lib/repositories/analytics-repository.ts` → `getCorrelations(userId, days)`. Each comparison reads the last *N* `DailyMetrics` rows and groups by a binary condition:
 
-### Score Calculation
+| ID | Metric | Condition |
+|---|---|---|
+| `prod-vs-exercise` | `productivityScore` | `exerciseMinutes >= 30` |
+| `prod-vs-streak` | `productivityScore` | `habitsCompleted >= habitsTotal` (full-streak day) |
+| `wellness-vs-nutrition` | `wellnessScore` | `caloriesTracked` true |
+| `wellness-vs-water` | `wellnessScore` | `waterGoalMet` true |
+| `growth-vs-learning` | `growthScore` | `learningMinutes > 0` |
 
-#### Productivity Score (0-100)
-- Task completion rate: 50%
-- On-time completion rate: 30%
-- Task activity: 20%
+Direction: `POSITIVE` when delta ≥ +5 %, `NEGATIVE` when ≤ −5 %, otherwise `NEUTRAL`. Group-by-mean was chosen over Pearson r so the user-facing copy reads as "+27 % on exercise days" instead of "r = 0.42".
 
-#### Wellness Score (0-100)
-- Habit completion rate: 40%
-- Exercise activity: 30%
-- Nutrition tracking: 30%
+## Metrics engine
 
-#### Growth Score (0-100)
-- Learning time invested: 70%
-- Consistency bonus: 30%
+### Score calculation (current weights)
 
-#### Overall Score (0-100)
-Weighted average:
-- Productivity: 35%
-- Wellness: 35%
-- Growth: 30%
+- **Productivity:** task completion 50 %, on-time completion 30 %, task activity 20 %.
+- **Wellness:** habits 40 %, exercise 30 %, nutrition 30 %.
+- **Growth:** learning time 70 %, consistency bonus 30 %.
+- **Overall:** weighted (Productivity 35 % / Wellness 35 % / Growth 30 %).
 
-### Daily Metrics Aggregation
+### Daily aggregation
 
-The system automatically aggregates daily metrics from:
-- Task completions and timeliness
-- Habit completions
-- Exercise logs
-- Meal and water tracking
-- Learning resource progress
+`DailyMetrics` is the single source of truth for every analytics endpoint. After a side-effect-bearing mutation (task complete, habit complete, exercise log, meal log, water log, learning progress), the corresponding repo calls `updateDailyMetrics(userId, new Date())` from `lib/analytics/metrics-engine.ts`, which upserts the row for that day and recomputes the user's rolling sub-scores.
 
-### User Score Updates
+> **Schema note:** `prisma/schema.prisma` previously had a field-level `@unique` on `DailyMetrics.date` *and* a composite `@@unique([userId, date])`. The field-level constraint blocked all but one user platform-wide from owning a metrics row per date. The schema has been corrected to drop the field-level constraint; the migration `npx prisma migrate dev --name fix_dailymetrics_unique` must be applied for multi-user `DailyMetrics` writes to succeed.
 
-User scores are updated as a rolling 7-day average, providing a balanced view of recent performance while smoothing out daily fluctuations.
+## Future enhancements
 
-## Data Flow
-
-1. **User Activity** → Various modules (Tasks, Habits, Fitness, etc.)
-2. **Metrics Calculation** → `updateDailyMetrics()` aggregates and calculates scores
-3. **Storage** → DailyMetrics table stores daily snapshots
-4. **User Scores** → Rolling 7-day average updates User table
-5. **API Endpoints** → Serve aggregated data to UI components
-6. **Dashboard** → Displays real-time insights and visualizations
-
-## Integration
-
-To trigger metrics updates after user activities:
-
-```typescript
-import { updateDailyMetrics } from '@/lib/analytics/metrics-engine'
-
-// After completing a task, habit, exercise, etc.
-await updateDailyMetrics(userId, new Date())
-```
-
-This ensures scores are always up-to-date with the latest user activities.
-
-## Future Enhancements
-
-- Machine learning-based insights
-- Predictive analytics for goal achievement
-- Comparative analytics (vs. previous periods)
-- Custom metric definitions
-- Advanced data export formats
-- Social comparison features (opt-in)
+- Pearson correlations alongside the group-by-mean view.
+- PDF report export (currently CSV only).
+- Year-over-year comparisons.
+- Custom user-defined correlation queries.
