@@ -109,7 +109,7 @@ export function HabitBoard() {
       </div>
 
       {showForm && (
-        <div className="bg-gray-50 p-6 rounded-lg">
+        <div className="bg-muted p-6 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">Create New Habit</h3>
           <HabitForm onSubmit={handleCreateHabit} />
         </div>
@@ -129,7 +129,7 @@ export function HabitBoard() {
       </div>
 
       {habits.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-muted-foreground">
           <p className="text-lg mb-2">No habits yet</p>
           <p className="text-sm">Create your first habit to get started!</p>
         </div>

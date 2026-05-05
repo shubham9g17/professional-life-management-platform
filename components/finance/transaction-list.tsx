@@ -68,14 +68,14 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
         <div className="space-y-2">
           <Label htmlFor="type-filter">Type</Label>
           <select
             id="type-filter"
             value={filters.type}
             onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Types</option>
             <option value="INCOME">Income</option>
@@ -89,7 +89,7 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
             id="category-filter"
             value={filters.category}
             onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
@@ -113,9 +113,9 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
 
       {/* Transaction List */}
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500">Loading transactions...</div>
+        <div className="text-center py-8 text-muted-foreground">Loading transactions...</div>
       ) : filteredTransactions.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           {transactions.length === 0 ? 'No transactions yet' : 'No transactions match your filters'}
         </div>
       ) : (
@@ -123,34 +123,34 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
           {filteredTransactions.map((transaction) => (
             <div
               key={transaction.id}
-              className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+              className="bento-card flex items-center justify-between p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-3">
                   <span
                     className={`px-2 py-1 text-xs font-semibold rounded ${
                       transaction.type === 'INCOME'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200'
                     }`}
                   >
                     {transaction.type}
                   </span>
-                  <h3 className="font-semibold text-gray-900">{transaction.description}</h3>
+                  <h3 className="font-semibold text-foreground">{transaction.description}</h3>
                 </div>
-                <div className="mt-1 flex items-center gap-4 text-sm text-gray-600">
+                <div className="mt-1 flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="font-medium">{transaction.category}</span>
                   {transaction.subcategory && (
-                    <span className="text-gray-500">• {transaction.subcategory}</span>
+                    <span className="text-muted-foreground">• {transaction.subcategory}</span>
                   )}
-                  <span className="text-gray-500">• {formatDate(transaction.date)}</span>
+                  <span className="text-muted-foreground">• {formatDate(transaction.date)}</span>
                 </div>
                 {transaction.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {transaction.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs"
+                        className="px-2 py-0.5 bg-muted text-foreground rounded text-xs"
                       >
                         {tag}
                       </span>
@@ -162,7 +162,7 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
               <div className="flex items-center gap-4">
                 <span
                   className={`text-xl font-bold ${
-                    transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
+                    transaction.type === 'INCOME' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                   }`}
                 >
                   {transaction.type === 'INCOME' ? '+' : '-'}
@@ -184,7 +184,7 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
                       variant="outline"
                       size="sm"
                       onClick={() => onDelete(transaction.id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                     >
                       Delete
                     </Button>
@@ -198,11 +198,11 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
 
       {/* Summary */}
       {filteredTransactions.length > 0 && (
-        <div className="p-4 bg-gray-50 rounded-lg">
+        <div className="p-4 bg-muted rounded-lg">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-sm text-gray-600">Total Income</p>
-              <p className="text-lg font-bold text-green-600">
+              <p className="text-sm text-muted-foreground">Total Income</p>
+              <p className="text-lg font-bold text-green-600 dark:text-green-400">
                 {formatCurrency(
                   filteredTransactions
                     .filter(t => t.type === 'INCOME')
@@ -211,8 +211,8 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Total Expenses</p>
-              <p className="text-lg font-bold text-red-600">
+              <p className="text-sm text-muted-foreground">Total Expenses</p>
+              <p className="text-lg font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(
                   filteredTransactions
                     .filter(t => t.type === 'EXPENSE')
@@ -221,8 +221,8 @@ export function TransactionList({ transactions, onEdit, onDelete, isLoading }: T
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Net</p>
-              <p className="text-lg font-bold text-gray-900">
+              <p className="text-sm text-muted-foreground">Net</p>
+              <p className="text-lg font-bold text-foreground">
                 {formatCurrency(
                   filteredTransactions
                     .filter(t => t.type === 'INCOME')

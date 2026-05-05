@@ -189,20 +189,20 @@ export function LearningDashboard() {
       {/* Statistics Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="text-sm text-gray-600">Total Resources</div>
+          <div className="bento-card p-4">
+            <div className="text-sm text-muted-foreground">Total Resources</div>
             <div className="text-2xl font-bold">{stats.total}</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="text-sm text-gray-600">In Progress</div>
-            <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
+          <div className="bento-card p-4">
+            <div className="text-sm text-muted-foreground">In Progress</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.inProgress}</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="text-sm text-gray-600">Completed</div>
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+          <div className="bento-card p-4">
+            <div className="text-sm text-muted-foreground">Completed</div>
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.completed}</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="text-sm text-gray-600">Total Time</div>
+          <div className="bento-card p-4">
+            <div className="text-sm text-muted-foreground">Total Time</div>
             <div className="text-2xl font-bold">{formatTime(stats.totalTimeInvested)}</div>
           </div>
         </div>
@@ -210,7 +210,7 @@ export function LearningDashboard() {
 
       {/* Form */}
       {showForm && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bento-card p-6">
           <h2 className="text-xl font-semibold mb-4">
             {editingResource ? 'Edit Resource' : 'Add New Resource'}
           </h2>
@@ -242,7 +242,7 @@ export function LearningDashboard() {
       )}
 
       {/* Resource List */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bento-card p-6">
         <h2 className="text-xl font-semibold mb-4">Your Learning Resources</h2>
         <ResourceList
           resources={resources}
@@ -262,22 +262,22 @@ export function LearningDashboard() {
 
       {/* Recently Completed */}
       {stats && stats.recentlyCompleted.length > 0 && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bento-card p-6">
           <h2 className="text-xl font-semibold mb-4">Recently Completed</h2>
           <div className="space-y-2">
             {stats.recentlyCompleted.map((resource) => (
               <div
                 key={resource.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                className="flex items-center justify-between p-3 bg-muted rounded"
               >
                 <div>
                   <div className="font-medium">{resource.title}</div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     {resource.type} • {formatTime(resource.timeInvested)}
                   </div>
                 </div>
                 {resource.completedAt && (
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-muted-foreground">
                     {new Date(resource.completedAt).toLocaleDateString()}
                   </div>
                 )}

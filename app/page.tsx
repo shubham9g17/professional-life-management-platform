@@ -9,12 +9,12 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-background">
       <main className="flex flex-col items-center justify-center gap-8 p-8 text-center">
-        <h1 className="text-4xl font-bold text-gray-900">
+        <h1 className="text-4xl font-bold text-foreground">
           Professional Life Management Platform
         </h1>
-        <p className="max-w-2xl text-lg text-gray-600">
+        <p className="max-w-2xl text-lg text-muted-foreground">
           Enterprise-grade productivity and wellness application for working professionals.
           Manage tasks, track habits, monitor finances, and achieve your goals with data-driven insights.
         </p>
@@ -27,7 +27,7 @@ export default async function Home() {
           </a>
           <a
             href="/auth/signup"
-            className="rounded-md border border-gray-300 bg-white px-6 py-3 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            className="rounded-md border border-border bg-card px-6 py-3 text-foreground font-medium hover:bg-muted transition-colors"
           >
             Sign Up
           </a>

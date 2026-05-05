@@ -37,15 +37,15 @@ export function ResourceList({ resources, onEdit, onDelete, onUpdateProgress }: 
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'BOOK':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200'
       case 'COURSE':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'
       case 'CERTIFICATION':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200'
       case 'ARTICLE':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/40 dark:text-gray-200'
     }
   }
 
@@ -95,7 +95,7 @@ export function ResourceList({ resources, onEdit, onDelete, onUpdateProgress }: 
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background"
         >
           <option value="ALL">All Types</option>
           <option value="BOOK">Books</option>
@@ -107,7 +107,7 @@ export function ResourceList({ resources, onEdit, onDelete, onUpdateProgress }: 
 
       {/* Resource List */}
       {filteredResources.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-muted-foreground">
           <p>No learning resources found.</p>
           <p className="text-sm mt-2">Create your first resource to get started!</p>
         </div>
@@ -116,7 +116,7 @@ export function ResourceList({ resources, onEdit, onDelete, onUpdateProgress }: 
           {filteredResources.map((resource) => (
             <div
               key={resource.id}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className="border rounded-lg p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -131,9 +131,9 @@ export function ResourceList({ resources, onEdit, onDelete, onUpdateProgress }: 
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-3">{resource.category}</p>
+                  <p className="text-sm text-muted-foreground mb-3">{resource.category}</p>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                     <span>Started: {formatDate(resource.startDate)}</span>
                     {resource.completedAt && (
                       <span>Completed: {formatDate(resource.completedAt)}</span>
@@ -144,12 +144,12 @@ export function ResourceList({ resources, onEdit, onDelete, onUpdateProgress }: 
                   {/* Progress Bar */}
                   <div className="mb-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-700">Progress</span>
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-sm font-medium text-foreground">Progress</span>
+                      <span className="text-sm font-medium text-foreground">
                         {resource.completionPercentage}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full transition-all"
                         style={{ width: `${resource.completionPercentage}%` }}
@@ -162,7 +162,7 @@ export function ResourceList({ resources, onEdit, onDelete, onUpdateProgress }: 
                       href={resource.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline"
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       View Resource →
                     </a>
@@ -180,7 +180,7 @@ export function ResourceList({ resources, onEdit, onDelete, onUpdateProgress }: 
                       variant="outline"
                       size="sm"
                       onClick={() => onDelete(resource.id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                     >
                       Delete
                     </Button>

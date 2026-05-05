@@ -12,6 +12,12 @@ import { HabitForm } from '@/components/habits/habit-form'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 
+interface HabitCompletion {
+  id: string
+  completedAt: Date | string
+  notes: string | null
+}
+
 interface Habit {
   id: string
   name: string
@@ -20,9 +26,11 @@ interface Habit {
   targetCount: number
   currentStreak: number
   longestStreak: number
+  completionRate: number
   lastCompletedAt?: Date | string
   createdAt: Date | string
   updatedAt: Date | string
+  completions: HabitCompletion[]
 }
 
 export default function HabitsPage() {
@@ -199,7 +207,11 @@ export default function HabitsPage() {
                 habits={habits.map((h) => ({
                   id: h.id,
                   name: h.name,
-                  completions: [],
+                  completions: (h.completions ?? []).map((c) => ({
+                    id: c.id,
+                    completedAt: new Date(c.completedAt),
+                    notes: c.notes,
+                  })),
                 }))}
               />
             </div>
@@ -222,8 +234,12 @@ export default function HabitsPage() {
                         name: habit.name,
                         currentStreak: habit.currentStreak,
                         longestStreak: habit.longestStreak,
-                        completionRate: 0,
-                        completions: [],
+                        completionRate: habit.completionRate ?? 0,
+                        completions: (habit.completions ?? []).map((c) => ({
+                          id: c.id,
+                          completedAt: new Date(c.completedAt),
+                          notes: c.notes,
+                        })),
                       }}
                     />
                   </div>

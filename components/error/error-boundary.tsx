@@ -105,21 +105,21 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <Card className="w-full max-w-md p-6">
             <div className="space-y-4">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-red-600">
+                <h2 className="text-2xl font-bold text-red-600 dark:text-red-400">
                   Something went wrong
                 </h2>
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-muted-foreground">
                   An unexpected error occurred. Please try again.
                 </p>
               </div>
 
               {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="rounded-md bg-red-50 p-4">
-                  <p className="text-xs font-mono text-red-800">
+                <div className="rounded-md bg-red-50 p-4 dark:bg-red-950/30">
+                  <p className="text-xs font-mono text-red-800 dark:text-red-200">
                     {this.state.error.message}
                   </p>
                   {this.state.error.stack && (
-                    <pre className="mt-2 max-h-40 overflow-auto text-xs text-red-700">
+                    <pre className="mt-2 max-h-40 overflow-auto text-xs text-red-700 dark:text-red-300">
                       {this.state.error.stack}
                     </pre>
                   )}

@@ -22,8 +22,8 @@ export async function POST(
     }
 
     const { id } = await params
-    const body = await request.json()
-    const { notes } = body
+    const body = await request.json().catch(() => ({}))
+    const { notes } = body as { notes?: string }
 
     const habit = await completeHabit(id, session.user.id, notes)
 

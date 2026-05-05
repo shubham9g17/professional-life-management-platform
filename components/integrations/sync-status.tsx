@@ -66,7 +66,7 @@ export function SyncStatus({ compact = false }: SyncStatusProps) {
 
   if (loading) {
     return (
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-muted-foreground">
         Loading sync status...
       </div>
     )
@@ -81,7 +81,7 @@ export function SyncStatus({ compact = false }: SyncStatusProps) {
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1">
           <div className={`w-2 h-2 rounded-full ${errorIntegrations.length > 0 ? 'bg-red-500' : 'bg-green-500'}`} />
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-muted-foreground">
             {activeIntegrations.length} active
           </span>
         </div>
@@ -127,7 +127,7 @@ export function SyncStatus({ compact = false }: SyncStatusProps) {
                 <div className="font-medium text-sm">
                   {integration.provider.replace(/_/g, ' ')}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-muted-foreground">
                   {integration.lastSyncAt
                     ? `Last sync: ${new Date(integration.lastSyncAt).toLocaleString()}`
                     : 'Never synced'}
@@ -150,8 +150,8 @@ export function SyncStatus({ compact = false }: SyncStatusProps) {
       </div>
 
       {errorIntegrations.length > 0 && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950/30 dark:border-red-900">
+          <p className="text-sm text-red-800 dark:text-red-200">
             {errorIntegrations.length} integration{errorIntegrations.length > 1 ? 's' : ''} need
             attention. Please reconnect or check settings.
           </p>

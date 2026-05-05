@@ -91,7 +91,7 @@ export function NutritionDashboard() {
 
       {/* Meal Form Modal */}
       {showMealForm && (
-        <div className="bg-white border rounded-lg p-6 shadow-lg">
+        <div className="bento-card p-6 shadow-lg">
           <h2 className="text-xl font-semibold mb-4">Log New Meal</h2>
           <MealForm onSubmit={handleMealSubmit} />
         </div>
@@ -106,8 +106,8 @@ export function NutritionDashboard() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-4 py-2 border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600 font-medium'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-medium'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               {tab.label}
@@ -125,47 +125,47 @@ export function NutritionDashboard() {
           ) : stats ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white border rounded-lg p-4">
-                  <h3 className="text-sm text-gray-600 mb-1">Total Meals</h3>
+                <div className="bento-card p-4">
+                  <h3 className="text-sm text-muted-foreground mb-1">Total Meals</h3>
                   <p className="text-2xl font-bold">{stats.totalMeals}</p>
-                  <p className="text-xs text-gray-500 mt-1">Last 30 days</p>
+                  <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
                 </div>
 
-                <div className="bg-white border rounded-lg p-4">
-                  <h3 className="text-sm text-gray-600 mb-1">Avg Calories</h3>
+                <div className="bento-card p-4">
+                  <h3 className="text-sm text-muted-foreground mb-1">Avg Calories</h3>
                   <p className="text-2xl font-bold">{stats.averageCalories}</p>
-                  <p className="text-xs text-gray-500 mt-1">Per meal</p>
+                  <p className="text-xs text-muted-foreground mt-1">Per meal</p>
                 </div>
 
-                <div className="bg-white border rounded-lg p-4">
-                  <h3 className="text-sm text-gray-600 mb-1">Avg Water</h3>
+                <div className="bento-card p-4">
+                  <h3 className="text-sm text-muted-foreground mb-1">Avg Water</h3>
                   <p className="text-2xl font-bold">{stats.averageDailyWater} ml</p>
-                  <p className="text-xs text-gray-500 mt-1">Per day</p>
+                  <p className="text-xs text-muted-foreground mt-1">Per day</p>
                 </div>
 
-                <div className="bg-white border rounded-lg p-4">
-                  <h3 className="text-sm text-gray-600 mb-1">Days Tracked</h3>
+                <div className="bento-card p-4">
+                  <h3 className="text-sm text-muted-foreground mb-1">Days Tracked</h3>
                   <p className="text-2xl font-bold">{stats.daysTracked}</p>
-                  <p className="text-xs text-gray-500 mt-1">Last 30 days</p>
+                  <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
                 </div>
               </div>
 
               {/* Meals by Type */}
-              <div className="bg-white border rounded-lg p-6">
+              <div className="bento-card p-6">
                 <h3 className="text-lg font-semibold mb-4">Meals by Type</h3>
                 {Object.keys(stats.mealsByType).length === 0 || stats.totalMeals === 0 ? (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     No meals logged yet. Use “Log Meal” to start tracking.
                   </p>
                 ) : (
                   <div className="space-y-3">
                     {Object.entries(stats.mealsByType).map(([type, count]) => (
                       <div key={type} className="flex items-center justify-between">
-                        <span className="text-gray-700 capitalize">
+                        <span className="text-foreground capitalize">
                           {type.toLowerCase()}
                         </span>
                         <div className="flex items-center gap-3">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
+                          <div className="w-32 bg-muted rounded-full h-2">
                             <div
                               className="bg-blue-500 h-2 rounded-full"
                               style={{
@@ -183,33 +183,33 @@ export function NutritionDashboard() {
 
               {/* Macros Summary */}
               {(stats.averageProtein > 0 || stats.averageCarbs > 0 || stats.averageFats > 0) && (
-                <div className="bg-white border rounded-lg p-6">
+                <div className="bento-card p-6">
                   <h3 className="text-lg font-semibold mb-4">Average Macros per Meal</h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-red-600">
+                      <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                         {stats.averageProtein}g
                       </p>
-                      <p className="text-sm text-gray-600">Protein</p>
+                      <p className="text-sm text-muted-foreground">Protein</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-yellow-600">
+                      <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                         {stats.averageCarbs}g
                       </p>
-                      <p className="text-sm text-gray-600">Carbs</p>
+                      <p className="text-sm text-muted-foreground">Carbs</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-blue-600">
+                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         {stats.averageFats}g
                       </p>
-                      <p className="text-sm text-gray-600">Fats</p>
+                      <p className="text-sm text-muted-foreground">Fats</p>
                     </div>
                   </div>
                 </div>
               )}
             </>
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               No nutrition data available yet. Start logging your meals!
             </div>
           )}

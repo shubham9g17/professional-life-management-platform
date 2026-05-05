@@ -115,7 +115,7 @@ export function FitnessGoals({ goals, onCreateGoal, onUpdateProgress, onDeleteGo
       </div>
 
       {showForm && onCreateGoal && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-card rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4">Create New Goal</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -124,7 +124,7 @@ export function FitnessGoals({ goals, onCreateGoal, onUpdateProgress, onDeleteGo
                 id="goalType"
                 value={formData.goalType}
                 onChange={(e) => setFormData({ ...formData, goalType: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               >
                 {goalTypes.map((type) => (
@@ -191,7 +191,7 @@ export function FitnessGoals({ goals, onCreateGoal, onUpdateProgress, onDeleteGo
               />
             </div>
 
-            {error && <div className="text-red-600 text-sm">{error}</div>}
+            {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
 
             <Button type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? 'Creating...' : 'Create Goal'}
@@ -203,7 +203,7 @@ export function FitnessGoals({ goals, onCreateGoal, onUpdateProgress, onDeleteGo
       {/* Goals List */}
       <div className="space-y-4">
         {goals.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-muted-foreground">
             <p className="text-lg">No fitness goals yet</p>
             <p className="text-sm mt-2">Create a goal to start tracking your progress!</p>
           </div>
@@ -215,7 +215,7 @@ export function FitnessGoals({ goals, onCreateGoal, onUpdateProgress, onDeleteGo
             return (
               <div
                 key={goal.id}
-                className={`bg-white rounded-lg shadow p-6 ${
+                className={`bg-card rounded-lg shadow p-6 ${
                   isCompleted ? 'border-2 border-green-500' : ''
                 }`}
               >
@@ -224,13 +224,13 @@ export function FitnessGoals({ goals, onCreateGoal, onUpdateProgress, onDeleteGo
                     <h3 className="text-lg font-semibold">
                       {goalTypes.find((t) => t.value === goal.goalType)?.label || goal.goalType}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       Target: {goal.targetValue} {goal.unit}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       Current: {goal.currentValue} {goal.unit}
                     </p>
-                    <p className="text-sm text-gray-600">Deadline: {formatDeadline(goal.deadline)}</p>
+                    <p className="text-sm text-muted-foreground">Deadline: {formatDeadline(goal.deadline)}</p>
                   </div>
                   {onDeleteGoal && (
                     <Button
@@ -249,7 +249,7 @@ export function FitnessGoals({ goals, onCreateGoal, onUpdateProgress, onDeleteGo
                     <span>Progress</span>
                     <span className="font-semibold">{progress}%</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div className="w-full bg-muted rounded-full h-3">
                     <div
                       className={`h-3 rounded-full transition-all ${
                         isCompleted ? 'bg-green-500' : 'bg-blue-500'
@@ -260,7 +260,7 @@ export function FitnessGoals({ goals, onCreateGoal, onUpdateProgress, onDeleteGo
                 </div>
 
                 {isCompleted && (
-                  <div className="mt-3 text-green-600 font-semibold text-sm">
+                  <div className="mt-3 text-green-600 dark:text-green-400 font-semibold text-sm">
                     ✓ Goal Completed!
                   </div>
                 )}

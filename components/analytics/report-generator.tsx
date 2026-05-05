@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Download, Share2, Loader2, Trophy, AlertCircle } from 'lucide-react'
+import { FileText, Download, Loader2, Trophy, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -196,18 +196,15 @@ export function ReportGenerator({ onGenerate }: ReportGeneratorProps) {
           )}
 
           <div className="flex flex-wrap gap-2 border-t border-border pt-4">
-            <Button variant="outline" size="sm">
-              <Download className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
-              Export PDF
-            </Button>
-            <Button variant="outline" size="sm">
+            <a
+              href={`/api/analytics/reports/export?type=${report.type}`}
+              download
+              rel="noopener"
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
               <Download className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
               Export CSV
-            </Button>
-            <Button variant="outline" size="sm">
-              <Share2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
-              Share
-            </Button>
+            </a>
           </div>
         </div>
       )}

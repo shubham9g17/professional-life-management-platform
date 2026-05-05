@@ -69,7 +69,7 @@ export function LearningCharts({ resources }: LearningChartsProps) {
 
   if (resources.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         <p>No learning data available yet.</p>
         <p className="text-sm mt-2">Start adding resources to see your progress!</p>
       </div>
@@ -79,7 +79,7 @@ export function LearningCharts({ resources }: LearningChartsProps) {
   return (
     <div className="space-y-6">
       {/* Type Distribution */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bento-card p-6">
         <h3 className="text-lg font-semibold mb-4">Resources by Type</h3>
         <div className="space-y-3">
           {Object.entries(typeDistribution).map(([type, count]) => {
@@ -88,11 +88,11 @@ export function LearningCharts({ resources }: LearningChartsProps) {
               <div key={type}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium">{type}</span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-muted-foreground">
                     {count} ({Math.round(percentage)}%)
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full ${getTypeColor(type)}`}
                     style={{ width: `${percentage}%` }}
@@ -105,32 +105,32 @@ export function LearningCharts({ resources }: LearningChartsProps) {
       </div>
 
       {/* Completion Status */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bento-card p-6">
         <h3 className="text-lg font-semibold mb-4">Completion Status</h3>
         <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">
+          <div className="text-center p-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {completionStatus.completed}
             </div>
-            <div className="text-sm text-gray-600">Completed</div>
+            <div className="text-sm text-muted-foreground">Completed</div>
           </div>
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">
+          <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {completionStatus.inProgress}
             </div>
-            <div className="text-sm text-gray-600">In Progress</div>
+            <div className="text-sm text-muted-foreground">In Progress</div>
           </div>
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-gray-600">
+          <div className="text-center p-4 bg-muted rounded-lg">
+            <div className="text-2xl font-bold text-muted-foreground">
               {completionStatus.notStarted}
             </div>
-            <div className="text-sm text-gray-600">Not Started</div>
+            <div className="text-sm text-muted-foreground">Not Started</div>
           </div>
         </div>
       </div>
 
       {/* Time Investment by Category */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bento-card p-6">
         <h3 className="text-lg font-semibold mb-4">Time Investment by Category</h3>
         <div className="space-y-3">
           {Object.entries(timeByCategory)
@@ -142,11 +142,11 @@ export function LearningCharts({ resources }: LearningChartsProps) {
                 <div key={category}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium">{category}</span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                       {formatTime(time)} ({Math.round(percentage)}%)
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
                     <div
                       className="bg-indigo-500 h-2 rounded-full"
                       style={{ width: `${percentage}%` }}
@@ -160,7 +160,7 @@ export function LearningCharts({ resources }: LearningChartsProps) {
 
       {/* Monthly Completions */}
       {Object.keys(monthlyCompletions).length > 0 && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bento-card p-6">
           <h3 className="text-lg font-semibold mb-4">Completions Over Time</h3>
           <div className="space-y-3">
             {Object.entries(monthlyCompletions)
@@ -172,9 +172,9 @@ export function LearningCharts({ resources }: LearningChartsProps) {
                   <div key={month}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-medium">{month}</span>
-                      <span className="text-sm text-gray-600">{count} completed</span>
+                      <span className="text-sm text-muted-foreground">{count} completed</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
                       <div
                         className="bg-emerald-500 h-2 rounded-full"
                         style={{ width: `${percentage}%` }}

@@ -111,7 +111,7 @@ export function NotificationPreferences() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="taskReminders">Task Reminders</Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Get reminded about upcoming tasks
               </p>
             </div>
@@ -125,7 +125,7 @@ export function NotificationPreferences() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="habitNudges">Habit Nudges</Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Get gentle reminders for daily habits
               </p>
             </div>
@@ -139,7 +139,7 @@ export function NotificationPreferences() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="achievementNotifications">Achievement Notifications</Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Celebrate milestones and achievements
               </p>
             </div>
@@ -153,7 +153,7 @@ export function NotificationPreferences() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="budgetAlerts">Budget Alerts</Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Get notified when approaching budget limits
               </p>
             </div>
@@ -181,7 +181,7 @@ export function NotificationPreferences() {
               />
               <div>
                 <span className="font-medium">Real-time</span>
-                <p className="text-sm text-gray-500">Receive notifications immediately</p>
+                <p className="text-sm text-muted-foreground">Receive notifications immediately</p>
               </div>
             </label>
 
@@ -196,7 +196,7 @@ export function NotificationPreferences() {
               />
               <div>
                 <span className="font-medium">Hourly</span>
-                <p className="text-sm text-gray-500">Batch notifications every hour</p>
+                <p className="text-sm text-muted-foreground">Batch notifications every hour</p>
               </div>
             </label>
 
@@ -211,7 +211,7 @@ export function NotificationPreferences() {
               />
               <div>
                 <span className="font-medium">Daily</span>
-                <p className="text-sm text-gray-500">Receive a daily summary</p>
+                <p className="text-sm text-muted-foreground">Receive a daily summary</p>
               </div>
             </label>
           </div>
@@ -220,7 +220,7 @@ export function NotificationPreferences() {
         {/* Quiet Hours */}
         <div className="space-y-4">
           <h3 className="text-sm font-medium">Quiet Hours</h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Set times when you don't want to receive notifications
           </p>
           

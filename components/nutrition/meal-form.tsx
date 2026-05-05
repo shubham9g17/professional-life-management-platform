@@ -91,7 +91,7 @@ export function MealForm({ onSubmit, initialData, isEditing = false }: MealFormP
               mealType: e.target.value as MealFormData['mealType'],
             })
           }
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         >
           {mealTypes.map((type) => (
@@ -127,13 +127,13 @@ export function MealForm({ onSubmit, initialData, isEditing = false }: MealFormP
             {formData.foodItems.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded"
+                className="flex items-center justify-between bg-muted px-3 py-2 rounded"
               >
                 <span>{item}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveFoodItem(index)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                 >
                   Remove
                 </button>
@@ -226,7 +226,7 @@ export function MealForm({ onSubmit, initialData, isEditing = false }: MealFormP
         </div>
       </div>
 
-      {error && <div className="text-red-600 text-sm">{error}</div>}
+      {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? 'Saving...' : isEditing ? 'Update Meal' : 'Log Meal'}

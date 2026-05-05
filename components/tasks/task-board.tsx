@@ -39,9 +39,9 @@ interface TaskBoardProps {
 }
 
 const columns = [
-  { id: 'TODO', title: 'To Do', color: 'bg-gray-100' },
-  { id: 'IN_PROGRESS', title: 'In Progress', color: 'bg-blue-100' },
-  { id: 'COMPLETED', title: 'Completed', color: 'bg-green-100' },
+  { id: 'TODO', title: 'To Do', color: 'bg-gray-100 dark:bg-gray-800/60' },
+  { id: 'IN_PROGRESS', title: 'In Progress', color: 'bg-blue-100 dark:bg-blue-900/30' },
+  { id: 'COMPLETED', title: 'Completed', color: 'bg-green-100 dark:bg-green-900/30' },
 ]
 
 export function TaskBoard({ tasks, onEdit, onDelete, onComplete, onStatusChange, onCreateNew }: TaskBoardProps) {
@@ -89,8 +89,8 @@ export function TaskBoard({ tasks, onEdit, onDelete, onComplete, onStatusChange,
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Task Board</h2>
-          <p className="text-gray-600 mt-1">{tasks.length} total tasks</p>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Task Board</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{tasks.length} total tasks</p>
         </div>
         {onCreateNew && (
           <Button onClick={onCreateNew}>
@@ -112,13 +112,13 @@ export function TaskBoard({ tasks, onEdit, onDelete, onComplete, onStatusChange,
             return (
               <div
                 key={column.id}
-                className="flex flex-col bg-white border rounded-lg overflow-hidden"
+                className="bento-card flex flex-col overflow-hidden"
               >
                 {/* Column Header */}
-                <div className={`${column.color} px-4 py-3 border-b`}>
-                  <h3 className="font-semibold text-gray-900">
+                <div className={`${column.color} px-4 py-3 border-b border-border`}>
+                  <h3 className="font-semibold text-foreground">
                     {column.title}
-                    <span className="ml-2 text-sm text-gray-600">
+                    <span className="ml-2 text-sm text-muted-foreground">
                       ({columnTasks.length})
                     </span>
                   </h3>
@@ -132,7 +132,7 @@ export function TaskBoard({ tasks, onEdit, onDelete, onComplete, onStatusChange,
                 >
                   <div className="flex-1 p-4 space-y-3 min-h-[200px]">
                     {columnTasks.length === 0 ? (
-                      <div className="text-center py-8 text-gray-400 text-sm">
+                      <div className="text-center py-8 text-muted-foreground text-sm">
                         No tasks
                       </div>
                     ) : (

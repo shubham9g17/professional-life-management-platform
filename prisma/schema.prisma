@@ -314,7 +314,7 @@ model LearningResource {
 model DailyMetrics {
   id               String   @id @default(cuid())
   userId           String
-  date             DateTime @unique
+  date             DateTime
   tasksCompleted   Int      @default(0)
   tasksOnTime      Int      @default(0)
   habitsCompleted  Int      @default(0)

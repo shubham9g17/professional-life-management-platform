@@ -20,10 +20,10 @@ interface ExerciseLogProps {
 }
 
 const intensityColors = {
-  LOW: 'bg-green-100 text-green-800',
-  MODERATE: 'bg-yellow-100 text-yellow-800',
-  HIGH: 'bg-orange-100 text-orange-800',
-  INTENSE: 'bg-red-100 text-red-800',
+  LOW: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+  MODERATE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
+  HIGH: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200',
+  INTENSE: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
 }
 
 export function ExerciseLog({ exercises, onEdit, onDelete }: ExerciseLogProps) {
@@ -52,7 +52,7 @@ export function ExerciseLog({ exercises, onEdit, onDelete }: ExerciseLogProps) {
 
   if (exercises.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-muted-foreground">
         <p className="text-lg">No exercises logged yet</p>
         <p className="text-sm mt-2">Start tracking your fitness activities!</p>
       </div>
@@ -64,7 +64,7 @@ export function ExerciseLog({ exercises, onEdit, onDelete }: ExerciseLogProps) {
       {exercises.map((exercise) => (
         <div
           key={exercise.id}
-          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+          className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow"
         >
           <div className="flex justify-between items-start">
             <div className="flex-1">
@@ -73,14 +73,14 @@ export function ExerciseLog({ exercises, onEdit, onDelete }: ExerciseLogProps) {
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                     intensityColors[exercise.intensity as keyof typeof intensityColors] ||
-                    'bg-gray-100 text-gray-800'
+                    'bg-gray-100 text-gray-800 dark:bg-gray-900/40 dark:text-gray-200'
                   }`}
                 >
                   {exercise.intensity}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-2">
+              <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-2">
                 <div>
                   <span className="font-medium">Duration:</span> {exercise.duration} min
                 </div>
@@ -95,7 +95,7 @@ export function ExerciseLog({ exercises, onEdit, onDelete }: ExerciseLogProps) {
               </div>
 
               {exercise.notes && (
-                <p className="text-sm text-gray-600 mt-2 italic">{exercise.notes}</p>
+                <p className="text-sm text-muted-foreground mt-2 italic">{exercise.notes}</p>
               )}
             </div>
 

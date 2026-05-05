@@ -122,9 +122,9 @@ export function AnalyticsDashboard() {
 
   if (error) {
     return (
-      <div className="p-12 text-center bg-white border border-gray-200 rounded-lg">
+      <div className="p-12 text-center bento-card">
         <svg
-          className="w-12 h-12 mx-auto text-red-500 mb-4"
+          className="w-12 h-12 mx-auto text-red-500 dark:text-red-400 mb-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -136,7 +136,7 @@ export function AnalyticsDashboard() {
             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <p className="text-gray-700 mb-4">{error}</p>
+        <p className="text-foreground mb-4">{error}</p>
         <button
           onClick={loadAnalyticsData}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -151,8 +151,8 @@ export function AnalyticsDashboard() {
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Analytics Dashboard</h1>
+        <p className="text-muted-foreground">
           Track your progress and gain insights into your productivity, wellness, and growth.
         </p>
       </div>
@@ -169,24 +169,24 @@ export function AnalyticsDashboard() {
 
       {/* Today's Activity */}
       {overview && (
-        <div className="p-6 bg-white border border-gray-200 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Today's Activity</h3>
+        <div className="bento-card p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Today's Activity</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Tasks Completed</p>
-              <p className="text-2xl font-bold text-gray-900">{overview.today.tasksCompleted}</p>
+              <p className="text-sm text-muted-foreground mb-1">Tasks Completed</p>
+              <p className="text-2xl font-bold text-foreground">{overview.today.tasksCompleted}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Habits Completed</p>
-              <p className="text-2xl font-bold text-gray-900">{overview.today.habitsCompleted}</p>
+              <p className="text-sm text-muted-foreground mb-1">Habits Completed</p>
+              <p className="text-2xl font-bold text-foreground">{overview.today.habitsCompleted}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Exercise Minutes</p>
-              <p className="text-2xl font-bold text-gray-900">{overview.today.exerciseMinutes}</p>
+              <p className="text-sm text-muted-foreground mb-1">Exercise Minutes</p>
+              <p className="text-2xl font-bold text-foreground">{overview.today.exerciseMinutes}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Learning Minutes</p>
-              <p className="text-2xl font-bold text-gray-900">{overview.today.learningMinutes}</p>
+              <p className="text-sm text-muted-foreground mb-1">Learning Minutes</p>
+              <p className="text-2xl font-bold text-foreground">{overview.today.learningMinutes}</p>
             </div>
           </div>
         </div>

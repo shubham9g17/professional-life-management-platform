@@ -5,13 +5,13 @@ import { motion, useReducedMotion } from 'framer-motion'
 import {
   RefreshCw,
   AlertCircle,
-  Sparkles,
   TrendingUp,
   TrendingDown,
   CheckCircle2,
   Heart,
-  GraduationCap,
   Wallet,
+  Activity,
+  GraduationCap,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -28,12 +28,6 @@ import { ActivityFeedWidget } from './activity-feed-widget'
 import { QuickActionsWidget } from './quick-actions-widget'
 
 interface DashboardData {
-  scores: {
-    productivity: number
-    wellness: number
-    growth: number
-    overall: number
-  }
   productivity: {
     tasksCompleted: number
     tasksTotal: number
@@ -169,7 +163,7 @@ export function DashboardOverview() {
       </div>
 
       <BentoGrid>
-        {/* Hero — Overall score */}
+        {/* Hero — Cashflow */}
         <BentoCard
           span="2x2"
           index={0}
@@ -177,41 +171,55 @@ export function DashboardOverview() {
         >
           <BentoCardHeader>
             <div className="flex items-center gap-2 text-primary">
-              <Sparkles className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-              <BentoCardTitle className="text-primary">Today&apos;s Overall</BentoCardTitle>
+              <Wallet className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+              <BentoCardTitle className="text-primary">Cashflow</BentoCardTitle>
             </div>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-              Live
+            <span
+              className={cn(
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium',
+                cashflowPositive
+                  ? 'bg-success/10 text-success'
+                  : 'bg-destructive/10 text-destructive'
+              )}
+            >
+              {cashflowPositive ? (
+                <TrendingUp className="h-3 w-3" strokeWidth={2} aria-hidden="true" />
+              ) : (
+                <TrendingDown className="h-3 w-3" strokeWidth={2} aria-hidden="true" />
+              )}
+              {data.financial.savingsRate.toFixed(0)}%
             </span>
           </BentoCardHeader>
           <BentoCardBody className="flex flex-col justify-between gap-4">
-            <div className="flex items-baseline gap-2">
-              <span
-                className="font-mono text-6xl font-semibold tracking-tight text-foreground tabular-nums sm:text-7xl"
+            <div>
+              <p
+                className="font-mono text-5xl font-semibold tracking-tight text-foreground tabular-nums sm:text-6xl"
                 data-numeric
               >
-                {Math.round(data.scores.overall)}
-              </span>
-              <span className="text-lg text-muted-foreground">/ 100</span>
+                {formatCurrency(data.financial.currentBalance)}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {formatCurrency(cashflow)} this month
+              </p>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <ScoreSlice
-                icon={CheckCircle2}
-                label="Focus"
-                value={data.scores.productivity}
-                tint="text-chart-1"
+              <MetricSlice
+                icon={TrendingUp}
+                label="Income"
+                value={formatCurrency(data.financial.monthlyIncome)}
+                tint="text-success"
               />
-              <ScoreSlice
-                icon={Heart}
-                label="Wellness"
-                value={data.scores.wellness}
-                tint="text-chart-3"
+              <MetricSlice
+                icon={TrendingDown}
+                label="Expenses"
+                value={formatCurrency(data.financial.monthlyExpenses)}
+                tint="text-destructive"
               />
-              <ScoreSlice
-                icon={GraduationCap}
-                label="Growth"
-                value={data.scores.growth}
-                tint="text-chart-2"
+              <MetricSlice
+                icon={Wallet}
+                label="Savings"
+                value={`${data.financial.savingsRate.toFixed(0)}%`}
+                tint="text-primary"
               />
             </div>
           </BentoCardBody>
@@ -229,69 +237,57 @@ export function DashboardOverview() {
           color="rgb(var(--chart-1))"
         />
 
-        {/* Wellness KPI */}
+        {/* Habits KPI */}
         <KpiCard
           index={2}
           icon={Heart}
           label="Habits"
           value={`${habitPct}%`}
-          delta={`${data.wellness.exerciseMinutes} min exercise`}
-          deltaPositive={data.wellness.waterGoalMet}
+          delta={
+            data.wellness.habitsTotal > 0
+              ? `${data.wellness.habitsCompleted} of ${data.wellness.habitsTotal} done`
+              : 'No habits yet'
+          }
+          deltaPositive={habitPct >= 80}
           spark={seededSpark(data.wellness.habitsCompleted + 6)}
           color="rgb(var(--chart-3))"
         />
 
-        {/* Weekly trend (2x1) */}
-        <BentoCard span="2x1" index={3}>
-          <BentoCardHeader>
-            <BentoCardTitle>Weekly score trend</BentoCardTitle>
-            <span className="text-xs text-muted-foreground">last 7 days</span>
-          </BentoCardHeader>
-          <BentoCardBody className="pb-3">
-            <SparkArea
-              data={seededSpark(Math.round(data.scores.overall))}
-              color="rgb(var(--chart-1))"
-              height={88}
-              ariaLabel="Weekly overall score trend, gentle upward."
-            />
-          </BentoCardBody>
-        </BentoCard>
+        {/* Exercise KPI */}
+        <KpiCard
+          index={3}
+          icon={Activity}
+          label="Exercise"
+          value={`${data.wellness.exerciseMinutes} min`}
+          delta={
+            data.wellness.exerciseMinutes >= 30
+              ? 'Daily goal hit'
+              : data.wellness.exerciseMinutes > 0
+                ? `${30 - data.wellness.exerciseMinutes} min to goal`
+                : 'No activity yet'
+          }
+          deltaPositive={data.wellness.exerciseMinutes >= 30}
+          spark={seededSpark(data.wellness.exerciseMinutes + 3)}
+          color="rgb(var(--chart-4))"
+        />
 
-        {/* Finance */}
-        <BentoCard span="2x1" index={4}>
-          <BentoCardHeader>
-            <div className="flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
-              <BentoCardTitle>Cashflow</BentoCardTitle>
-            </div>
-            <span
-              className={cn(
-                'inline-flex items-center gap-1 text-xs font-medium',
-                cashflowPositive ? 'text-success' : 'text-destructive'
-              )}
-            >
-              {cashflowPositive ? (
-                <TrendingUp className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
-              ) : (
-                <TrendingDown className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
-              )}
-              {data.financial.savingsRate.toFixed(0)}%
-            </span>
-          </BentoCardHeader>
-          <BentoCardBody className="flex items-end justify-between gap-3">
-            <div>
-              <p
-                className="font-mono text-3xl font-semibold tabular-nums text-foreground sm:text-4xl"
-                data-numeric
-              >
-                {formatCurrency(data.financial.currentBalance)}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {formatCurrency(cashflow)} this month
-              </p>
-            </div>
-          </BentoCardBody>
-        </BentoCard>
+        {/* Learning KPI */}
+        <KpiCard
+          index={4}
+          icon={GraduationCap}
+          label="Learning"
+          value={`${data.growth.learningMinutes} min`}
+          delta={
+            data.growth.resourcesInProgress > 0
+              ? `${data.growth.resourcesInProgress} in progress`
+              : data.growth.resourcesCompleted > 0
+                ? `${data.growth.resourcesCompleted} completed`
+                : 'No resources yet'
+          }
+          deltaPositive={data.growth.learningMinutes > 0}
+          spark={seededSpark(data.growth.learningMinutes + 2)}
+          color="rgb(var(--chart-2))"
+        />
 
         {/* Activity feed (3x1) */}
         <BentoCard span="3x1" index={5} className="p-0">
@@ -315,7 +311,7 @@ function greetingFor(hour: number): string {
   return 'Winding down'
 }
 
-function ScoreSlice({
+function MetricSlice({
   icon: Icon,
   label,
   value,
@@ -323,15 +319,15 @@ function ScoreSlice({
 }: {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   label: string
-  value: number
+  value: string
   tint: string
 }) {
   return (
     <div className="rounded-lg bg-background/50 p-2.5 ring-1 ring-border/60">
       <Icon className={cn('mb-1.5 h-4 w-4', tint)} strokeWidth={1.75} aria-hidden="true" />
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="font-mono text-lg font-semibold tabular-nums text-foreground" data-numeric>
-        {Math.round(value)}
+      <p className="font-mono text-base font-semibold tabular-nums text-foreground sm:text-lg" data-numeric>
+        {value}
       </p>
     </div>
   )
@@ -381,18 +377,77 @@ function KpiCard({ index, icon: Icon, label, value, delta, deltaPositive, spark,
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header — mirrors the greeting + refresh button */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-8 w-44 sm:h-9 sm:w-56" />
           <Skeleton className="h-4 w-32" />
         </div>
-        <Skeleton className="h-10 w-10 rounded-lg" />
+        <Skeleton className="h-10 w-10 rounded-md" />
       </div>
+
       <BentoGrid>
-        <Skeleton className="col-span-1 row-span-2 sm:col-span-2 h-[var(--bento-gap,1rem)] min-h-[376px] rounded-[var(--card-radius)]" />
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-[180px] rounded-[var(--card-radius)]" />
+        {/* Hero — Cashflow (2x2) */}
+        <div className="bento-card col-span-1 row-span-2 flex flex-col gap-5 p-6 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-5 w-12 rounded-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-12 w-48 sm:h-14 sm:w-56" />
+            <Skeleton className="h-4 w-36" />
+          </div>
+          <div className="mt-auto grid grid-cols-3 gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2 rounded-lg border border-border bg-background/40 p-3">
+                <Skeleton className="h-3.5 w-3.5 rounded" />
+                <Skeleton className="h-3 w-12" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 4 KPI tiles (1x1 each) */}
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="bento-card col-span-1 row-span-1 flex flex-col gap-3 p-5"
+          >
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-3.5 w-20" />
+            </div>
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="mt-auto h-9 w-full rounded-sm" />
+          </div>
         ))}
+
+        {/* Activity feed (3x1) */}
+        <div className="bento-card col-span-1 row-span-1 space-y-3 p-5 sm:col-span-2 lg:col-span-3">
+          <Skeleton className="h-4 w-32" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <Skeleton className="h-8 w-8 rounded-full" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-3.5 w-3/4 max-w-xs" />
+                <Skeleton className="h-3 w-1/2 max-w-[10rem]" />
+              </div>
+              <Skeleton className="h-3 w-12" />
+            </div>
+          ))}
+        </div>
+
+        {/* Quick actions (1x1, expands to 2 cols on sm) */}
+        <div className="bento-card col-span-1 row-span-1 space-y-3 p-5 sm:col-span-2 lg:col-span-1">
+          <Skeleton className="h-4 w-24" />
+          <div className="grid grid-cols-2 gap-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 rounded-md" />
+            ))}
+          </div>
+        </div>
       </BentoGrid>
     </div>
   )

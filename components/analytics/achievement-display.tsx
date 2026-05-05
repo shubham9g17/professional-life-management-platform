@@ -13,21 +13,22 @@ interface AchievementDisplayProps {
   achievements: Achievement[]
   isLoading?: boolean
   limit?: number
+  onViewAll?: () => void
 }
 
-export function AchievementDisplay({ achievements, isLoading, limit }: AchievementDisplayProps) {
+export function AchievementDisplay({ achievements, isLoading, limit, onViewAll }: AchievementDisplayProps) {
   if (isLoading) {
     return (
-      <div className="p-6 bg-white border border-gray-200 rounded-lg">
+      <div className="bento-card p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                 </div>
               </div>
             ))}
@@ -42,13 +43,13 @@ export function AchievementDisplay({ achievements, isLoading, limit }: Achieveme
   const getCategoryColor = (category: Achievement['category']) => {
     switch (category) {
       case 'PRODUCTIVITY':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-200 dark:border-green-900/60'
       case 'WELLNESS':
-        return 'bg-purple-100 text-purple-800 border-purple-200'
+        return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/40 dark:text-purple-200 dark:border-purple-900/60'
       case 'GROWTH':
-        return 'bg-orange-100 text-orange-800 border-orange-200'
+        return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/40 dark:text-orange-200 dark:border-orange-900/60'
       case 'FINANCIAL':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-900/60'
     }
   }
 
@@ -91,9 +92,9 @@ export function AchievementDisplay({ achievements, isLoading, limit }: Achieveme
 
   if (displayAchievements.length === 0) {
     return (
-      <div className="p-12 text-center bg-white border border-gray-200 rounded-lg">
+      <div className="p-12 text-center bento-card">
         <svg
-          className="w-16 h-16 mx-auto text-gray-400 mb-4"
+          className="w-16 h-16 mx-auto text-muted-foreground mb-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -105,17 +106,17 @@ export function AchievementDisplay({ achievements, isLoading, limit }: Achieveme
             d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
           />
         </svg>
-        <p className="text-gray-500 mb-2">No achievements yet</p>
-        <p className="text-sm text-gray-400">Keep working towards your goals to unlock achievements!</p>
+        <p className="text-muted-foreground mb-2">No achievements yet</p>
+        <p className="text-sm text-muted-foreground">Keep working towards your goals to unlock achievements!</p>
       </div>
     )
   }
 
   return (
-    <div className="p-6 bg-white border border-gray-200 rounded-lg">
+    <div className="bento-card p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Achievements</h3>
-        <span className="text-sm text-gray-500">{achievements.length} unlocked</span>
+        <h3 className="text-lg font-semibold text-foreground">Achievements</h3>
+        <span className="text-sm text-muted-foreground">{achievements.length} unlocked</span>
       </div>
 
       <div className="space-y-4">
@@ -124,7 +125,7 @@ export function AchievementDisplay({ achievements, isLoading, limit }: Achieveme
           return (
             <div
               key={achievement.id}
-              className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              className="flex items-start gap-4 p-4 bg-muted rounded-lg hover:bg-muted/70 transition-colors"
             >
               <div className={`p-3 rounded-full border-2 ${colorClass}`}>
                 {getCategoryIcon(achievement.category)}
@@ -132,10 +133,10 @@ export function AchievementDisplay({ achievements, isLoading, limit }: Achieveme
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h4 className="font-semibold text-gray-900">{achievement.title}</h4>
-                    <p className="text-sm text-gray-600 mt-1">{achievement.description}</p>
+                    <h4 className="font-semibold text-foreground">{achievement.title}</h4>
+                    <p className="text-sm text-muted-foreground mt-1">{achievement.description}</p>
                   </div>
-                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {formatDate(achievement.unlockedAt)}
                   </span>
                 </div>
@@ -150,9 +151,13 @@ export function AchievementDisplay({ achievements, isLoading, limit }: Achieveme
         })}
       </div>
 
-      {limit && achievements.length > limit && (
+      {limit && achievements.length > limit && onViewAll && (
         <div className="mt-4 text-center">
-          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+          <button
+            type="button"
+            onClick={onViewAll}
+            className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          >
             View all {achievements.length} achievements →
           </button>
         </div>

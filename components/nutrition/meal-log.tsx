@@ -82,12 +82,12 @@ export function MealLog({ onEdit, onDelete }: MealLogProps) {
 
   const getMealTypeColor = (type: string) => {
     const colors: Record<string, string> = {
-      BREAKFAST: 'bg-yellow-100 text-yellow-800',
-      LUNCH: 'bg-green-100 text-green-800',
-      DINNER: 'bg-blue-100 text-blue-800',
-      SNACK: 'bg-purple-100 text-purple-800',
+      BREAKFAST: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
+      LUNCH: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+      DINNER: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
+      SNACK: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200',
     }
-    return colors[type] || 'bg-gray-100 text-gray-800'
+    return colors[type] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/40 dark:text-gray-200'
   }
 
   if (isLoading) {
@@ -95,7 +95,7 @@ export function MealLog({ onEdit, onDelete }: MealLogProps) {
   }
 
   if (error) {
-    return <div className="text-red-600 text-center py-8">{error}</div>
+    return <div className="text-red-600 dark:text-red-400 text-center py-8">{error}</div>
   }
 
   return (
@@ -139,7 +139,7 @@ export function MealLog({ onEdit, onDelete }: MealLogProps) {
       </div>
 
       {meals.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           No meals logged yet. Start tracking your nutrition!
         </div>
       ) : (
@@ -158,7 +158,7 @@ export function MealLog({ onEdit, onDelete }: MealLogProps) {
                   >
                     {getMealTypeLabel(meal.mealType)}
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     {meal.date.toLocaleDateString()}
                   </span>
                 </div>
@@ -176,7 +176,7 @@ export function MealLog({ onEdit, onDelete }: MealLogProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(meal.id)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                   >
                     Delete
                   </Button>
@@ -185,7 +185,7 @@ export function MealLog({ onEdit, onDelete }: MealLogProps) {
 
               <div className="mb-2">
                 <h4 className="text-sm font-medium mb-1">Food Items:</h4>
-                <ul className="list-disc list-inside text-sm text-gray-700">
+                <ul className="list-disc list-inside text-sm text-foreground">
                   {meal.foodItems.map((item, index) => (
                     <li key={index}>{item}</li>
                   ))}
@@ -193,7 +193,7 @@ export function MealLog({ onEdit, onDelete }: MealLogProps) {
               </div>
 
               {(meal.calories || meal.protein || meal.carbs || meal.fats) && (
-                <div className="flex gap-4 text-sm text-gray-600 pt-2 border-t">
+                <div className="flex gap-4 text-sm text-muted-foreground pt-2 border-t">
                   {meal.calories && <span>Calories: {meal.calories}</span>}
                   {meal.protein && <span>Protein: {meal.protein}g</span>}
                   {meal.carbs && <span>Carbs: {meal.carbs}g</span>}

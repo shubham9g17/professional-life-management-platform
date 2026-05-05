@@ -26,10 +26,10 @@ interface TaskCalendarProps {
 }
 
 const priorityColors = {
-  LOW: 'bg-gray-200 hover:bg-gray-300',
-  MEDIUM: 'bg-blue-200 hover:bg-blue-300',
-  HIGH: 'bg-orange-200 hover:bg-orange-300',
-  URGENT: 'bg-red-200 hover:bg-red-300',
+  LOW: 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600',
+  MEDIUM: 'bg-blue-200 text-blue-900 hover:bg-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:hover:bg-blue-900/70',
+  HIGH: 'bg-orange-200 text-orange-900 hover:bg-orange-300 dark:bg-orange-900/50 dark:text-orange-100 dark:hover:bg-orange-900/70',
+  URGENT: 'bg-red-200 text-red-900 hover:bg-red-300 dark:bg-red-900/50 dark:text-red-100 dark:hover:bg-red-900/70',
 }
 
 export function TaskCalendar({ tasks, onTaskClick, onCreateNew }: TaskCalendarProps) {
@@ -114,8 +114,8 @@ export function TaskCalendar({ tasks, onTaskClick, onCreateNew }: TaskCalendarPr
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Task Calendar</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Task Calendar</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             {tasks.filter(t => t.dueDate).length} tasks with due dates
           </p>
         </div>
@@ -127,9 +127,9 @@ export function TaskCalendar({ tasks, onTaskClick, onCreateNew }: TaskCalendarPr
       </div>
 
       {/* Calendar Controls */}
-      <div className="bg-white border rounded-lg p-4">
+      <div className="bento-card p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-gray-900">
+          <h3 className="text-xl font-semibold text-foreground">
             {monthNames[month]} {year}
           </h3>
           <div className="flex gap-2">
@@ -151,7 +151,7 @@ export function TaskCalendar({ tasks, onTaskClick, onCreateNew }: TaskCalendarPr
           {dayNames.map(day => (
             <div
               key={day}
-              className="text-center font-semibold text-gray-700 py-2 text-sm"
+              className="text-center font-semibold text-muted-foreground py-2 text-sm"
             >
               {day}
             </div>
@@ -170,17 +170,17 @@ export function TaskCalendar({ tasks, onTaskClick, onCreateNew }: TaskCalendarPr
               <div
                 key={day}
                 className={cn(
-                  'min-h-[100px] border rounded-lg p-2 bg-white hover:bg-gray-50 transition-colors',
-                  today && 'border-blue-500 border-2 bg-blue-50'
+                  'min-h-[100px] border border-border rounded-lg p-2 bg-card hover:bg-muted/40 transition-colors',
+                  today && 'border-blue-500 border-2 bg-blue-50 dark:bg-blue-950/30'
                 )}
               >
                 <div className={cn(
                   'text-sm font-semibold mb-1',
-                  today ? 'text-blue-600' : 'text-gray-700'
+                  today ? 'text-blue-600 dark:text-blue-400' : 'text-foreground'
                 )}>
                   {day}
                 </div>
-                
+
                 <div className="space-y-1">
                   {dayTasks.slice(0, 3).map(task => (
                     <button
@@ -196,7 +196,7 @@ export function TaskCalendar({ tasks, onTaskClick, onCreateNew }: TaskCalendarPr
                     </button>
                   ))}
                   {dayTasks.length > 3 && (
-                    <div className="text-xs text-gray-500 px-2">
+                    <div className="text-xs text-muted-foreground px-2">
                       +{dayTasks.length - 3} more
                     </div>
                   )}
@@ -208,24 +208,24 @@ export function TaskCalendar({ tasks, onTaskClick, onCreateNew }: TaskCalendarPr
       </div>
 
       {/* Legend */}
-      <div className="bg-white border rounded-lg p-4">
-        <h4 className="font-semibold text-gray-900 mb-3">Priority Legend</h4>
+      <div className="bento-card p-4">
+        <h4 className="font-semibold text-foreground mb-3">Priority Legend</h4>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-200 rounded" />
-            <span className="text-sm text-gray-700">Low</span>
+            <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+            <span className="text-sm text-muted-foreground">Low</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-200 rounded" />
-            <span className="text-sm text-gray-700">Medium</span>
+            <div className="w-4 h-4 bg-blue-200 dark:bg-blue-900/60 rounded" />
+            <span className="text-sm text-muted-foreground">Medium</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-orange-200 rounded" />
-            <span className="text-sm text-gray-700">High</span>
+            <div className="w-4 h-4 bg-orange-200 dark:bg-orange-900/60 rounded" />
+            <span className="text-sm text-muted-foreground">High</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-200 rounded" />
-            <span className="text-sm text-gray-700">Urgent</span>
+            <div className="w-4 h-4 bg-red-200 dark:bg-red-900/60 rounded" />
+            <span className="text-sm text-muted-foreground">Urgent</span>
           </div>
         </div>
       </div>
