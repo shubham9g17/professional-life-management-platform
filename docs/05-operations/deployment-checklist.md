@@ -7,7 +7,7 @@ Use this checklist before deploying to production to ensure all requirements are
 ### Code Quality
 
 - [ ] Vitest unit/property tests passing (`npm test`)
-- [ ] Playwright e2e suite passing on `--project=laptop` (requires local `npm run dev`). See [`../Test.md`](../Test.md) for the per-feature mapping. Note: one test (`Tasks completion side-effects`) is currently `.fixme` due to the documented `DailyMetrics.date @unique` schema bug — confirm the migration has been applied before treating this as green.
+- [ ] Playwright e2e suite passing on `--project=laptop` (requires local `npm run dev`). See [`../../Test.md`](../../Test.md) for the per-feature mapping. Note: one test (`Tasks completion side-effects`) is currently `.fixme` due to the documented `DailyMetrics.date @unique` schema bug — confirm the migration has been applied before treating this as green.
 - [ ] No TypeScript errors (`npx tsc --noEmit`)
 - [ ] No linting errors (`npm run lint`)
 - [ ] Code coverage > 80% for critical paths in `lib/**`
@@ -340,11 +340,11 @@ After deployment, schedule a review meeting to discuss:
 
 ## Resources
 
-- [Deployment Guide](./DEPLOYMENT.md)
-- [Monitoring Guide](./MONITORING.md)
-- [Troubleshooting Guide](./TROUBLESHOOTING.md)
-- [Operations Runbook](./RUNBOOK.md)
-- [Security Documentation](./SECURITY.md)
+- [Deployment Guide](./deployment.md)
+- [Monitoring Guide](./monitoring.md)
+- [Troubleshooting Guide](./troubleshooting.md)
+- [Operations Runbook](./runbook.md)
+- [Security Documentation](./security.md)
 
 ## Version History
 

@@ -9,7 +9,7 @@ This document provides a high-level overview of the database schema for the Prof
 > - Array fields (`Task.tags`, `Meal.foodItems`) are stored as **`String @default("[]")`** and `JSON.stringify`/`JSON.parse`'d at the API boundary.
 > - Repositories in `lib/repositories/*` are the only callers of `prisma.*` directly.
 
-> **Known schema issue:** `DailyMetrics.date` is currently declared `@unique` on the field *and* `@@unique([userId, date])` as a composite. The standalone `@unique` makes only one user platform-wide allowed to own a metrics row per date. Drop the field-level `@unique` (keep the composite) and run `npx prisma migrate dev --name fix_dailymetrics_unique`. See [`../IMPLEMENTATION_STATUS.md`](../IMPLEMENTATION_STATUS.md#known-issues-not-yet-fixed) and [`./TROUBLESHOOTING.md`](./TROUBLESHOOTING.md#known-issues).
+> **Known schema issue:** `DailyMetrics.date` is currently declared `@unique` on the field *and* `@@unique([userId, date])` as a composite. The standalone `@unique` makes only one user platform-wide allowed to own a metrics row per date. Drop the field-level `@unique` (keep the composite) and run `npx prisma migrate dev --name fix_dailymetrics_unique`. See [`../../IMPLEMENTATION_STATUS.md`](../../IMPLEMENTATION_STATUS.md#known-issues-not-yet-fixed) and [`../05-operations/troubleshooting.md`](../05-operations/troubleshooting.md#known-issues).
 
 ## Entity Relationship Diagram (Conceptual)
 

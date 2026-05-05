@@ -2,6 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Documentation map
+
+The `docs/` tree is structured around three audiences. When a user asks for context, point them to the right entry:
+
+| Audience | Entry doc |
+|---|---|
+| Student / contributor learning the codebase | `docs/01-onboarding/codebase-tour.md` (narrated walk through the repo). |
+| University teacher / examiner | `docs/06-academic/project-report.md` (formal report). |
+| Recruiter / interviewer | `docs/07-portfolio/highlights.md`, `docs/07-portfolio/elevator-pitch.md`. |
+| Future agent (you) | This file + `docs/04-development/conventions.md` + `docs/adr/`. |
+
+`docs/README.md` is the navigation hub. Eight ADRs in `docs/adr/` record non-trivial decisions (Next 16 App Router, Prisma over Drizzle, string-typed enums, JWT sessions, repository pattern, dual `<BentoCard>`/`.bento-card`, IndexedDB offline, group-by-mean correlations).
+
+When fixing a bug or adding a feature, also update:
+- `FEATURES.md` (root) for new endpoints / pages.
+- `Test.md` (root) for new test mappings.
+- `IMPLEMENTATION_STATUS.md` (root) for status changes.
+- The relevant `docs/03-features/<domain>.md` if domain-specific.
+- A new ADR in `docs/adr/` if a non-trivial choice was made.
+
 ## Common Commands
 
 ```bash
