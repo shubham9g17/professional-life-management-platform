@@ -23,7 +23,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
 
       <div className="flex">
         {/* Desktop sidebar */}
-        <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-border md:bg-card/40">
+        <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-border md:bg-card">
           <div className="sticky top-0 flex-1 overflow-y-auto p-4">
             <DashboardSidebar />
           </div>
