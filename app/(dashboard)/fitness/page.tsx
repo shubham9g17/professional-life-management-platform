@@ -6,8 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FitnessDashboard } from '@/components/fitness/fitness-dashboard'
 import { ExerciseLog } from '@/components/fitness/exercise-log'
+import { ExerciseForm, type ExerciseFormData } from '@/components/fitness/exercise-form'
 import { FitnessGoals } from '@/components/fitness/fitness-goals'
 import { HealthMetricsForm } from '@/components/fitness/health-metrics-form'
+import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 
 function mode<T>(values: Array<T | null | undefined>): T | null {
@@ -32,6 +34,7 @@ export default function FitnessPage() {
   const [goals, setGoals] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [showExerciseForm, setShowExerciseForm] = useState(false)
   const { toast } = useToast()
   const reduce = useReducedMotion()
 
@@ -78,6 +81,26 @@ export default function FitnessPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleCreateExercise = async (data: ExerciseFormData) => {
+    const response = await fetch('/api/exercises', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error || 'Failed to log exercise')
+    }
+
+    setShowExerciseForm(false)
+    await fetchData()
+    toast({
+      title: 'Exercise logged',
+      description: `${data.activityType} · ${data.duration} min`,
+    })
   }
 
   const handleDeleteExercise = async (exerciseId: string) => {
@@ -214,7 +237,26 @@ export default function FitnessPage() {
           {stats && <FitnessDashboard stats={stats} />}
         </TabsContent>
 
-        <TabsContent value="exercises" className="mt-6">
+        <TabsContent value="exercises" className="mt-6 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {exercises.length} exercise{exercises.length === 1 ? '' : 's'} logged
+            </p>
+            <Button
+              onClick={() => setShowExerciseForm((s) => !s)}
+              variant={showExerciseForm ? 'outline' : 'default'}
+            >
+              {showExerciseForm ? 'Cancel' : '+ Log Exercise'}
+            </Button>
+          </div>
+
+          {showExerciseForm && (
+            <div className="bento-card p-6">
+              <h2 className="mb-4 text-lg font-semibold text-foreground">Log new exercise</h2>
+              <ExerciseForm onSubmit={handleCreateExercise} />
+            </div>
+          )}
+
           <ExerciseLog
             exercises={exercises}
             onDelete={handleDeleteExercise}
