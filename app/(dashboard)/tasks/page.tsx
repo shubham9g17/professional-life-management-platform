@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Skeleton } from '@/components/ui/skeleton'
 import { TaskBoard } from '@/components/tasks/task-board'
 import { TaskList } from '@/components/tasks/task-list'
 import { TaskCalendar } from '@/components/tasks/task-calendar'
@@ -32,8 +34,8 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const reduce = useReducedMotion()
 
-  // Fetch tasks
   useEffect(() => {
     fetchTasks()
   }, [])
@@ -197,15 +199,25 @@ export default function TasksPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading tasks...</div>
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-72 rounded-[var(--card-radius)]" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
     <>
-      <div className="space-y-6">
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 6 }}
+        animate={reduce ? undefined : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
         <Tabs defaultValue="board" className="w-full">
           <TabsList>
             <TabsTrigger value="board">Board</TabsTrigger>
@@ -251,7 +263,7 @@ export default function TasksPage() {
             />
           </TabsContent>
         </Tabs>
-      </div>
+      </motion.div>
 
       {/* Create Task Dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>

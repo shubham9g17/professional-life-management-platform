@@ -61,7 +61,7 @@ This runbook contains step-by-step procedures for common operational tasks for t
 5. **Verify deployment:**
    ```bash
    # Check health
-   curl https://your-domain.com/health
+   curl https://your-domain.com/api/health
    
    # Check version
    curl https://your-domain.com/api/version
@@ -207,7 +207,7 @@ This runbook contains step-by-step procedures for common operational tasks for t
 
 4. **Verify rollback:**
    ```bash
-   curl https://your-domain.com/health
+   curl https://your-domain.com/api/health
    curl https://your-domain.com/api/version
    ```
 
@@ -606,7 +606,7 @@ This runbook contains step-by-step procedures for common operational tasks for t
 
 4. **Verify application works:**
    ```bash
-   curl https://your-domain.com/health
+   curl https://your-domain.com/api/health
    ```
 
 5. **Update documentation:**
@@ -722,7 +722,7 @@ This runbook contains step-by-step procedures for common operational tasks for t
 
 ```bash
 # Health check
-curl https://your-domain.com/health | jq
+curl https://your-domain.com/api/health | jq
 
 # View logs
 vercel logs --follow

@@ -173,10 +173,10 @@ export function NotificationList({ onClose }: NotificationListProps) {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             <p>No notifications</p>
           </div>
         ) : (
@@ -186,8 +186,8 @@ export function NotificationList({ onClose }: NotificationListProps) {
                 key={notification.id}
                 className={`p-3 rounded-lg border transition-colors cursor-pointer ${
                   notification.read
-                    ? 'bg-white hover:bg-gray-50'
-                    : 'bg-blue-50 hover:bg-blue-100 border-blue-200'
+                    ? 'bg-card hover:bg-muted'
+                    : 'bg-blue-50 hover:bg-blue-100 border-blue-200 dark:bg-blue-950/30 dark:hover:bg-blue-900/40 dark:border-blue-900'
                 }`}
                 onClick={() => !notification.read && markAsRead(notification.id)}
               >
@@ -205,10 +205,10 @@ export function NotificationList({ onClose }: NotificationListProps) {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {notification.message}
                     </p>
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-xs text-muted-foreground mt-2">
                       {formatDate(notification.createdAt)}
                     </p>
                   </div>

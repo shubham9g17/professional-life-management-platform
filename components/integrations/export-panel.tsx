@@ -105,7 +105,7 @@ export function ExportPanel() {
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold mb-2">Export Data</h2>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Download your data in various formats for backup or analysis
           </p>
         </div>
@@ -144,7 +144,7 @@ export function ExportPanel() {
             {ENTITY_OPTIONS.map(entity => (
               <label
                 key={entity.value}
-                className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50"
+                className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-muted"
               >
                 <input
                   type="checkbox"
@@ -157,7 +157,7 @@ export function ExportPanel() {
             ))}
           </div>
           {selectedEntities.length === 0 && (
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Leave empty to export all data
             </p>
           )}
@@ -168,7 +168,7 @@ export function ExportPanel() {
           <Label className="mb-2 block">Date Range (Optional)</Label>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-xs text-gray-600 mb-1 block">
+              <Label className="text-xs text-muted-foreground mb-1 block">
                 Start Date
               </Label>
               <input
@@ -179,7 +179,7 @@ export function ExportPanel() {
               />
             </div>
             <div>
-              <Label className="text-xs text-gray-600 mb-1 block">
+              <Label className="text-xs text-muted-foreground mb-1 block">
                 End Date
               </Label>
               <input
@@ -190,7 +190,7 @@ export function ExportPanel() {
               />
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             Leave empty to export all historical data
           </p>
         </div>
@@ -206,9 +206,9 @@ export function ExportPanel() {
         </Button>
 
         {/* Info */}
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950/30 dark:border-blue-900">
           <h4 className="font-semibold text-sm mb-1">Export Information</h4>
-          <ul className="text-xs text-gray-700 space-y-1">
+          <ul className="text-xs text-foreground space-y-1">
             <li>• JSON: Complete data with full structure</li>
             <li>• CSV: Spreadsheet-compatible format</li>
             <li>• PDF: Professional report format</li>

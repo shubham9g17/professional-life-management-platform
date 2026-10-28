@@ -119,15 +119,15 @@ export function WaterTracker({ dailyGoal = 2000 }: WaterTrackerProps) {
   return (
     <div className="space-y-6">
       {/* Progress Section */}
-      <div className="bg-blue-50 rounded-lg p-6">
+      <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Today's Water Intake</h3>
-        
+
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-2">
             <span className="font-medium">{totalIntake} ml</span>
-            <span className="text-gray-600">{dailyGoal} ml goal</span>
+            <span className="text-muted-foreground">{dailyGoal} ml goal</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+          <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
             <div
               className="bg-blue-500 h-full transition-all duration-300 rounded-full"
               style={{ width: `${progressPercentage}%` }}
@@ -136,11 +136,11 @@ export function WaterTracker({ dailyGoal = 2000 }: WaterTrackerProps) {
         </div>
 
         {remainingAmount > 0 ? (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {remainingAmount} ml remaining to reach your daily goal
           </p>
         ) : (
-          <p className="text-sm text-green-600 font-medium">
+          <p className="text-sm text-green-600 dark:text-green-400 font-medium">
             🎉 Daily goal achieved!
           </p>
         )}
@@ -176,7 +176,7 @@ export function WaterTracker({ dailyGoal = 2000 }: WaterTrackerProps) {
             ))}
           </div>
 
-          {error && <div className="text-red-600 text-sm">{error}</div>}
+          {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
 
           <Button
             onClick={handleAddWater}
@@ -196,12 +196,12 @@ export function WaterTracker({ dailyGoal = 2000 }: WaterTrackerProps) {
             {waterIntakes.map((intake) => (
               <div
                 key={intake.id}
-                className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded"
+                className="flex items-center justify-between bg-muted px-3 py-2 rounded"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-blue-600">💧</span>
+                  <span className="text-blue-600 dark:text-blue-400">💧</span>
                   <span className="font-medium">{intake.amount} ml</span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     {intake.date.toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -210,7 +210,7 @@ export function WaterTracker({ dailyGoal = 2000 }: WaterTrackerProps) {
                 </div>
                 <button
                   onClick={() => handleDeleteIntake(intake.id)}
-                  className="text-red-600 hover:text-red-800 text-sm"
+                  className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm"
                 >
                   Remove
                 </button>

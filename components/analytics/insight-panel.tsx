@@ -1,5 +1,9 @@
 'use client'
 
+import { CheckCircle2, TrendingUp, Info, Lightbulb } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
+
 interface Insight {
   type: 'POSITIVE' | 'NEUTRAL' | 'IMPROVEMENT'
   category: 'PRODUCTIVITY' | 'WELLNESS' | 'GROWTH' | 'OVERALL'
@@ -13,144 +17,111 @@ interface InsightPanelProps {
   isLoading?: boolean
 }
 
+const typeStyles: Record<Insight['type'], { surface: string; icon: string; Icon: typeof CheckCircle2 }> = {
+  POSITIVE: {
+    surface: 'border-success/30 bg-success/5',
+    icon: 'text-success',
+    Icon: CheckCircle2,
+  },
+  IMPROVEMENT: {
+    surface: 'border-warning/30 bg-warning/5',
+    icon: 'text-warning',
+    Icon: TrendingUp,
+  },
+  NEUTRAL: {
+    surface: 'border-primary/20 bg-primary/5',
+    icon: 'text-primary',
+    Icon: Info,
+  },
+}
+
+const categoryStyles: Record<Insight['category'], string> = {
+  PRODUCTIVITY: 'bg-chart-1/10 text-chart-1',
+  WELLNESS: 'bg-chart-3/10 text-chart-3',
+  GROWTH: 'bg-chart-2/10 text-chart-2',
+  OVERALL: 'bg-primary/10 text-primary',
+}
+
 export function InsightPanel({ insights, isLoading }: InsightPanelProps) {
   if (isLoading) {
     return (
-      <div className="p-6 bg-white border border-gray-200 rounded-lg">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+      <div className="bento-card p-5">
+        <Skeleton className="h-5 w-40" />
+        <div className="mt-4 space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 rounded-lg" />
+          ))}
         </div>
       </div>
     )
   }
 
-  const getTypeStyles = (type: Insight['type']) => {
-    switch (type) {
-      case 'POSITIVE':
-        return {
-          bg: 'bg-green-50',
-          border: 'border-green-200',
-          icon: 'text-green-600',
-          iconBg: 'bg-green-100',
-        }
-      case 'IMPROVEMENT':
-        return {
-          bg: 'bg-orange-50',
-          border: 'border-orange-200',
-          icon: 'text-orange-600',
-          iconBg: 'bg-orange-100',
-        }
-      case 'NEUTRAL':
-        return {
-          bg: 'bg-blue-50',
-          border: 'border-blue-200',
-          icon: 'text-blue-600',
-          iconBg: 'bg-blue-100',
-        }
-    }
-  }
-
-  const getTypeIcon = (type: Insight['type']) => {
-    switch (type) {
-      case 'POSITIVE':
-        return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        )
-      case 'IMPROVEMENT':
-        return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-        )
-      case 'NEUTRAL':
-        return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        )
-    }
-  }
-
-  const getCategoryBadge = (category: Insight['category']) => {
-    const colors = {
-      PRODUCTIVITY: 'bg-green-100 text-green-800',
-      WELLNESS: 'bg-purple-100 text-purple-800',
-      GROWTH: 'bg-orange-100 text-orange-800',
-      OVERALL: 'bg-blue-100 text-blue-800',
-    }
-
-    return (
-      <span className={`px-2 py-1 text-xs font-medium rounded ${colors[category]}`}>
-        {category.toLowerCase()}
-      </span>
-    )
-  }
-
   if (insights.length === 0) {
     return (
-      <div className="p-12 text-center bg-white border border-gray-200 rounded-lg">
-        <svg
-          className="w-12 h-12 mx-auto text-gray-400 mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-          />
-        </svg>
-        <p className="text-gray-500">Keep tracking your activities to generate personalized insights!</p>
+      <div className="bento-card flex flex-col items-center gap-3 py-16 text-center">
+        <Lightbulb className="h-10 w-10 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+        <div>
+          <p className="text-base font-medium text-foreground">Nothing to suggest yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep tracking activities and personalized insights will appear here.
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 bg-white border border-gray-200 rounded-lg">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Insights & Recommendations</h3>
-        <span className="text-sm text-gray-500">{insights.length} insights</span>
+    <div className="bento-card p-5">
+      <div className="mb-5 flex items-center justify-between">
+        <h3 className="text-base font-semibold text-foreground">Insights & recommendations</h3>
+        <span className="text-xs text-muted-foreground">
+          {insights.length} insight{insights.length === 1 ? '' : 's'}
+        </span>
       </div>
 
-      <div className="space-y-4">
+      <ul className="space-y-3">
         {insights.map((insight, index) => {
-          const styles = getTypeStyles(insight.type)
+          const styles = typeStyles[insight.type]
+          const Icon = styles.Icon
           return (
-            <div
+            <li
               key={index}
-              className={`p-4 border rounded-lg ${styles.bg} ${styles.border}`}
+              className={cn('rounded-lg border p-4 transition-colors', styles.surface)}
             >
               <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${styles.iconBg} ${styles.icon}`}>
-                  {getTypeIcon(insight.type)}
+                <div
+                  className={cn(
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-border',
+                    styles.icon
+                  )}
+                >
+                  <Icon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-semibold text-gray-900">{insight.title}</h4>
-                    {getCategoryBadge(insight.category)}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4 className="font-semibold text-foreground">{insight.title}</h4>
+                    <span
+                      className={cn(
+                        'rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide',
+                        categoryStyles[insight.category]
+                      )}
+                    >
+                      {insight.category.toLowerCase()}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-700">{insight.description}</p>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{insight.description}</p>
                   {insight.metric !== undefined && (
-                    <div className="mt-2">
-                      <span className="text-lg font-bold text-gray-900">{insight.metric}</span>
-                      <span className="text-sm text-gray-600 ml-1">score</span>
-                    </div>
+                    <p className="mt-2 font-mono text-sm tabular-nums text-foreground" data-numeric>
+                      <span className="text-lg font-semibold">{insight.metric}</span>
+                      <span className="ml-1 text-muted-foreground">score</span>
+                    </p>
                   )}
                 </div>
               </div>
-            </div>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </div>
   )
 }

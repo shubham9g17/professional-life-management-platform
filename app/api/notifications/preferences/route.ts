@@ -54,17 +54,18 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json()
 
-    // Validate quiet hours format if provided
-    if (body.quietHoursStart && !/^\d{2}:\d{2}$/.test(body.quietHoursStart)) {
+    // Validate quiet hours: HH:mm with hours 00-23 and minutes 00-59.
+    const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/
+    if (body.quietHoursStart && !HHMM.test(body.quietHoursStart)) {
       return NextResponse.json(
-        { error: 'Invalid quietHoursStart format. Use HH:mm' },
+        { error: 'Invalid quietHoursStart format. Use HH:mm (00:00-23:59)' },
         { status: 400 }
       )
     }
 
-    if (body.quietHoursEnd && !/^\d{2}:\d{2}$/.test(body.quietHoursEnd)) {
+    if (body.quietHoursEnd && !HHMM.test(body.quietHoursEnd)) {
       return NextResponse.json(
-        { error: 'Invalid quietHoursEnd format. Use HH:mm' },
+        { error: 'Invalid quietHoursEnd format. Use HH:mm (00:00-23:59)' },
         { status: 400 }
       )
     }

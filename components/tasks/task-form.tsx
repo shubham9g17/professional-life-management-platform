@@ -39,7 +39,14 @@ export function TaskForm({ onSubmit, onCancel, initialData, isLoading }: TaskFor
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
+    // datetime-local emits "YYYY-MM-DDTHH:mm" without timezone; the API's
+    // Zod .datetime() requires a full ISO string with offset. Empty value
+    // means "not set" — drop it so optional() applies.
+    const { dueDate, ...rest } = formData
+    onSubmit({
+      ...rest,
+      ...(dueDate ? { dueDate: new Date(dueDate).toISOString() } : {}),
+    } as TaskFormData)
   }
 
   const addTag = () => {

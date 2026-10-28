@@ -22,8 +22,8 @@ That's it! The application will run without attempting to connect to Redis.
 
 #### Development (.env)
 ```env
-# Database (SQLite for development)
-DATABASE_URL="file:./dev.db"
+# Database (PostgreSQL — the only supported datasource)
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"
@@ -224,7 +224,7 @@ export async function getTasks(userId: string) {
 
 ```bash
 # Health check
-curl https://your-domain.com/health | jq '.checks.redis'
+curl https://your-domain.com/api/health | jq '.checks.redis'
 
 # With Redis enabled
 {

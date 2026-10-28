@@ -9,13 +9,13 @@ The dashboard provides a comprehensive view of user productivity, wellness, grow
 ## Components
 
 ### DashboardOverview
-Main dashboard component that orchestrates all widgets and handles data fetching.
+Main dashboard component that orchestrates the bento grid and handles data fetching.
 
 **Features:**
-- Auto-refresh every 5 minutes
-- Manual refresh capability
-- Loading states and error handling
-- Real-time data updates
+- Auto-refresh every 5 minutes (silent — no flash of skeleton)
+- Manual refresh button
+- Skeleton mirrors the actual grid 1:1 (hero 2×2 + 4 KPI cards + 3-col activity feed + 1-col quick actions) instead of generic placeholder boxes
+- Loading + error states
 
 **Usage:**
 ```tsx
@@ -24,56 +24,44 @@ import { DashboardOverview } from '@/components/dashboard'
 <DashboardOverview />
 ```
 
+### Grid layout
+
+The dashboard renders a single `BentoGrid` with these tiles, in order. The `index` prop drives the staggered entrance animation.
+
+```
+┌──────────┬──────────┬──────┬──────┐
+│                     │      │      │
+│ Cashflow hero (2×2) │ Hbts │ Tsks │  ← row 1
+│                     │      │      │
+│                     ├──────┼──────┤
+│                     │ Exer │ Lrng │  ← row 2
+├─────────────────────┴──────┼──────┤
+│ Activity feed (3×1)        │ QA   │  ← row 3
+└────────────────────────────┴──────┘
+```
+
 ### Widgets
 
-#### ProductivityWidget
-Displays task completion metrics and productivity score.
+#### Cashflow hero (in `dashboard-overview.tsx`)
+Replaces the prior "Today's Overall" score hero. Renders the period balance as the primary number with a 2×2 internal grid of income / expenses / savings rate / latest transaction. Uses the chart-3 / chart-4 / chart-1 tokens for accent colors.
 
-**Props:**
-- `tasksCompleted`: Number of tasks completed today
-- `tasksTotal`: Total number of tasks
-- `tasksOnTime`: Number of tasks completed on time
-- `productivityScore`: Overall productivity score (0-100)
+#### MetricSlice tiles
+Four 1×1 KPI tiles. Each tile takes a string `value`, an icon, a tint, and an optional sparkline data array.
 
-#### WellnessWidget
-Shows health and habit tracking metrics.
-
-**Props:**
-- `habitsCompleted`: Number of habits completed today
-- `habitsTotal`: Total number of habits
-- `exerciseMinutes`: Minutes of exercise today
-- `waterGoalMet`: Whether daily water goal is met
-- `wellnessScore`: Overall wellness score (0-100)
-
-#### GrowthWidget
-Tracks learning and professional development.
-
-**Props:**
-- `learningMinutes`: Minutes spent learning today
-- `resourcesInProgress`: Number of learning resources in progress
-- `resourcesCompleted`: Number of completed resources
-- `growthScore`: Overall growth score (0-100)
-
-#### FinancialWidget
-Provides financial snapshot for the current month.
-
-**Props:**
-- `currentBalance`: Current balance
-- `monthlyIncome`: Total income this month
-- `monthlyExpenses`: Total expenses this month
-- `savingsRate`: Savings rate percentage
+| Tile | Source field | Tint |
+|---|---|---|
+| Habits | `habitsCompleted / habitsTotal` | `text-chart-3` |
+| Tasks | `tasksCompleted / tasksTotal` | `text-chart-1` |
+| Exercise | `exerciseMinutes` | `text-chart-4` |
+| Learning | `learningMinutes` | `text-chart-2` |
 
 #### QuickActionsWidget
-Quick access buttons for common actions.
+Compact 1×1 grid with 8 quick actions. Each action is a link to the destination page with a query string the page reads (e.g. `?action=new`).
 
-**Actions:**
-- Add Task
-- Log Habit
-- Log Exercise
-- Add Transaction
+**Actions:** Add Task · Log Habit · Log Exercise · Add Transaction · Log Meal · Log Water · Add Resource · View Stats.
 
 #### ActivityFeedWidget
-Shows recent user activities across all modules.
+Recent activity across all modules.
 
 **Props:**
 - `activities`: Array of recent activities
@@ -87,50 +75,20 @@ Shows recent user activities across all modules.
 - TRANSACTION
 - LEARNING
 
-## API Endpoints
+## API endpoints
 
 ### GET /api/dashboard/overview
 
-Returns comprehensive dashboard data including:
-- Scores (productivity, wellness, growth, overall)
-- Productivity metrics
-- Wellness metrics
-- Growth metrics
-- Financial snapshot
-- Recent activities
+Returns the payload that drives every tile on the dashboard. Scores live on the analytics page now — the dashboard is activity- and cashflow-focused.
 
-**Response:**
+**Response shape:**
 ```json
 {
-  "scores": {
-    "productivity": 75,
-    "wellness": 80,
-    "growth": 65,
-    "overall": 73
-  },
-  "productivity": {
-    "tasksCompleted": 5,
-    "tasksTotal": 10,
-    "tasksOnTime": 4
-  },
-  "wellness": {
-    "habitsCompleted": 3,
-    "habitsTotal": 5,
-    "exerciseMinutes": 30,
-    "waterGoalMet": true
-  },
-  "growth": {
-    "learningMinutes": 45,
-    "resourcesInProgress": 2,
-    "resourcesCompleted": 1
-  },
-  "financial": {
-    "currentBalance": 5000,
-    "monthlyIncome": 6000,
-    "monthlyExpenses": 4000,
-    "savingsRate": 33.3
-  },
-  "activities": [...]
+  "productivity": { "tasksCompleted": 5, "tasksTotal": 10, "tasksOnTime": 4 },
+  "wellness":     { "habitsCompleted": 3, "habitsTotal": 5, "exerciseMinutes": 30, "waterGoalMet": true },
+  "growth":       { "learningMinutes": 45, "resourcesInProgress": 2, "resourcesCompleted": 1 },
+  "financial":    { "currentBalance": 5000, "monthlyIncome": 6000, "monthlyExpenses": 4000, "savingsRate": 33.3 },
+  "activities":   [ /* up to 10 items */ ]
 }
 ```
 
@@ -187,26 +145,7 @@ The dashboard uses a combination of strategies for optimal performance:
 4. **Caching**: Uses `cache: 'no-store'` to ensure fresh data
 5. **Silent Updates**: Background refreshes don't show loading state
 
-## Score Calculation
-
-### Productivity Score
-- Based on task completion rate
-- Formula: (completed / total) * 100
-- Capped at 100
-
-### Wellness Score
-- Habit completion: 50 points max
-- Exercise: 50 points max (30 min = full score)
-- Formula: habitScore + exerciseScore
-
-### Growth Score
-- Learning time: 70 points max (60 min = full score)
-- Resource completion: 30 points per completion
-- Capped at 100
-
-### Overall Score
-- Average of productivity, wellness, and growth scores
-- Formula: (productivity + wellness + growth) / 3
+> **Where did the scores go?** The Productivity / Wellness / Growth / Overall scores are computed by `lib/analytics/metrics-engine.ts` and surfaced on the `/analytics` page, not here. The dashboard intentionally focuses on cashflow + today's activity counts.
 
 ## Requirements Validation
 

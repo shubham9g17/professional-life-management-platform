@@ -50,19 +50,19 @@ export function FinancialCharts({ stats }: FinancialChartsProps) {
   return (
     <div className="space-y-6">
       {/* Spending by Category Chart */}
-      <div className="p-6 bg-white border border-gray-200 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Spending by Category</h3>
+      <div className="bento-card p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-6">Spending by Category</h3>
         {categoryData.length > 0 ? (
           <div className="space-y-4">
             {categoryData.map(([category, amount]) => (
               <div key={category} className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-700">{category}</span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-medium text-foreground">{category}</span>
+                  <span className="text-sm font-semibold text-foreground">
                     {formatCurrency(amount)}
                   </span>
                 </div>
-                <div className="relative w-full bg-gray-200 rounded-full h-8">
+                <div className="relative w-full bg-muted rounded-full h-8">
                   <div
                     className="absolute top-0 left-0 h-8 bg-blue-600 rounded-full flex items-center justify-end pr-3"
                     style={{ width: `${(amount / maxCategoryAmount) * 100}%` }}
@@ -76,17 +76,17 @@ export function FinancialCharts({ stats }: FinancialChartsProps) {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-500 py-8">No spending data available</p>
+          <p className="text-center text-muted-foreground py-8">No spending data available</p>
         )}
       </div>
 
       {/* Monthly Income vs Expenses Chart */}
-      <div className="p-6 bg-white border border-gray-200 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Monthly Income vs Expenses</h3>
+      <div className="bento-card p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-6">Monthly Income vs Expenses</h3>
         {monthlyData.length > 0 ? (
           <div className="space-y-6">
             {/* Chart */}
-            <div className="flex items-end justify-between gap-2 h-64 border-b border-l border-gray-300 pb-2 pl-2">
+            <div className="flex items-end justify-between gap-2 h-64 border-b border-l border-border pb-2 pl-2">
               {monthlyData.map((month) => (
                 <div key={month.month} className="flex-1 flex flex-col items-center gap-2">
                   <div className="w-full flex gap-1 items-end justify-center h-full">
@@ -109,7 +109,7 @@ export function FinancialCharts({ stats }: FinancialChartsProps) {
                       title={`Expenses: ${formatCurrency(month.expenses)}`}
                     />
                   </div>
-                  <span className="text-xs text-gray-600 font-medium">
+                  <span className="text-xs text-muted-foreground font-medium">
                     {formatMonth(month.month)}
                   </span>
                 </div>
@@ -120,27 +120,27 @@ export function FinancialCharts({ stats }: FinancialChartsProps) {
             <div className="flex justify-center gap-6">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-green-500 rounded" />
-                <span className="text-sm text-gray-700">Income</span>
+                <span className="text-sm text-foreground">Income</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-500 rounded" />
-                <span className="text-sm text-gray-700">Expenses</span>
+                <span className="text-sm text-foreground">Expenses</span>
               </div>
             </div>
 
             {/* Monthly Details */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-border">
               {monthlyData.slice(-3).map((month) => (
                 <div key={month.month} className="text-center">
-                  <p className="text-xs text-gray-600 mb-2">{formatMonth(month.month)}</p>
+                  <p className="text-xs text-muted-foreground mb-2">{formatMonth(month.month)}</p>
                   <div className="space-y-1">
-                    <p className="text-sm text-green-600">
+                    <p className="text-sm text-green-600 dark:text-green-400">
                       Income: {formatCurrency(month.income)}
                     </p>
-                    <p className="text-sm text-red-600">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       Expenses: {formatCurrency(month.expenses)}
                     </p>
-                    <p className={`text-sm font-semibold ${month.balance >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
+                    <p className={`text-sm font-semibold ${month.balance >= 0 ? 'text-foreground' : 'text-red-600 dark:text-red-400'}`}>
                       Net: {formatCurrency(month.balance)}
                     </p>
                   </div>
@@ -149,7 +149,7 @@ export function FinancialCharts({ stats }: FinancialChartsProps) {
             </div>
           </div>
         ) : (
-          <p className="text-center text-gray-500 py-8">No monthly data available</p>
+          <p className="text-center text-muted-foreground py-8">No monthly data available</p>
         )}
       </div>
     </div>

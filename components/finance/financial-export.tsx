@@ -90,9 +90,9 @@ export function FinancialExport({ transactions }: FinancialExportProps) {
   }
 
   return (
-    <div className="p-6 bg-white border border-gray-200 rounded-lg">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Export Financial Data</h3>
-      
+    <div className="bento-card p-6">
+      <h3 className="text-lg font-semibold text-foreground mb-4">Export Financial Data</h3>
+
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="export-format">Export Format</Label>
@@ -100,18 +100,18 @@ export function FinancialExport({ transactions }: FinancialExportProps) {
             id="export-format"
             value={format}
             onChange={(e) => setFormat(e.target.value as 'CSV' | 'JSON')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="CSV">CSV (Comma-Separated Values)</option>
             <option value="JSON">JSON (JavaScript Object Notation)</option>
           </select>
         </div>
 
-        <div className="p-4 bg-gray-50 rounded-md">
-          <p className="text-sm text-gray-700 mb-2">
+        <div className="p-4 bg-muted rounded-md">
+          <p className="text-sm text-foreground mb-2">
             <strong>Export includes:</strong>
           </p>
-          <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
             <li>{transactions.length} transaction(s)</li>
             <li>All transaction details (date, type, category, amount, etc.)</li>
             <li>Tags and subcategories</li>
@@ -119,16 +119,16 @@ export function FinancialExport({ transactions }: FinancialExportProps) {
         </div>
 
         {format === 'CSV' && (
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-md dark:bg-blue-950/30 dark:border-blue-900/50">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
               <strong>CSV Format:</strong> Compatible with Excel, Google Sheets, and other spreadsheet applications.
             </p>
           </div>
         )}
 
         {format === 'JSON' && (
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-md dark:bg-blue-950/30 dark:border-blue-900/50">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
               <strong>JSON Format:</strong> Structured data format suitable for importing into other applications or databases.
             </p>
           </div>
@@ -143,7 +143,7 @@ export function FinancialExport({ transactions }: FinancialExportProps) {
         </Button>
 
         {transactions.length === 0 && (
-          <p className="text-sm text-gray-500 text-center">
+          <p className="text-sm text-muted-foreground text-center">
             No transactions to export
           </p>
         )}

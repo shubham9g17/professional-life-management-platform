@@ -1,7 +1,23 @@
 'use client'
 
+import { useMemo } from 'react'
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { LineChart as LineChartIcon } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+
 interface TrendData {
-  date: Date
+  date: Date | string
   productivityScore: number
   wellnessScore: number
   growthScore: number
@@ -13,156 +29,204 @@ interface TrendChartsProps {
   isLoading?: boolean
 }
 
+const series = [
+  {
+    key: 'productivityScore',
+    name: 'Productivity',
+    color: 'rgb(var(--chart-1))',
+    style: 'solid' as const,
+    dash: undefined,
+  },
+  {
+    key: 'wellnessScore',
+    name: 'Wellness',
+    color: 'rgb(var(--chart-3))',
+    style: 'dashed' as const,
+    dash: '6 4',
+  },
+  {
+    key: 'growthScore',
+    name: 'Growth',
+    color: 'rgb(var(--chart-2))',
+    style: 'dotted' as const,
+    dash: '2 4',
+  },
+]
+
+const formatTick = (date: string | Date) =>
+  new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+
 export function TrendCharts({ data, isLoading }: TrendChartsProps) {
+  const chartData = useMemo(
+    () =>
+      data.map((d) => ({
+        ...d,
+        date: typeof d.date === 'string' ? d.date : d.date.toISOString(),
+      })),
+    [data]
+  )
+
   if (isLoading) {
     return (
-      <div className="p-6 bg-white border border-gray-200 rounded-lg">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+      <div className="space-y-6">
+        <Skeleton className="h-[320px] rounded-[var(--card-radius)]" />
+        <Skeleton className="h-[320px] rounded-[var(--card-radius)]" />
+      </div>
+    )
+  }
+
+  if (chartData.length === 0) {
+    return (
+      <div className="bento-card flex flex-col items-center gap-3 py-16 text-center">
+        <LineChartIcon className="h-10 w-10 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+        <div>
+          <p className="text-base font-medium text-foreground">No trend data yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep tracking your activities — trends appear after a few days of data.
+          </p>
         </div>
       </div>
     )
   }
-
-  if (data.length === 0) {
-    return (
-      <div className="p-12 text-center bg-white border border-gray-200 rounded-lg">
-        <p className="text-gray-500">No trend data available yet. Keep tracking your activities!</p>
-      </div>
-    )
-  }
-
-  // Format date for display
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  }
-
-  // Calculate max value for scaling
-  const maxValue = Math.max(
-    ...data.flatMap(d => [d.productivityScore, d.wellnessScore, d.growthScore, d.overallScore])
-  )
-  const scale = maxValue > 0 ? 100 / maxValue : 1
 
   return (
     <div className="space-y-6">
-      {/* Overall Score Trend */}
-      <div className="p-6 bg-white border border-gray-200 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Score Trend</h3>
-        <div className="relative h-64">
-          <div className="absolute inset-0 flex items-end justify-between gap-1">
-            {data.map((point, index) => {
-              const height = (point.overallScore * scale).toFixed(1)
-              return (
-                <div key={index} className="flex-1 flex flex-col items-center">
-                  <div
-                    className="w-full bg-blue-500 rounded-t hover:bg-blue-600 transition-colors cursor-pointer"
-                    style={{ height: `${height}%` }}
-                    title={`${formatDate(point.date)}: ${point.overallScore.toFixed(1)}`}
-                  />
-                  {index % Math.ceil(data.length / 7) === 0 && (
-                    <span className="text-xs text-gray-500 mt-2 rotate-45 origin-left">
-                      {formatDate(point.date)}
-                    </span>
-                  )}
-                </div>
-              )
-            })}
+      <div className="bento-card p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Overall score</h3>
+            <p className="text-xs text-muted-foreground">
+              {chartData.length} day{chartData.length === 1 ? '' : 's'} tracked
+            </p>
           </div>
+        </div>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 8, left: -16 }}>
+              <defs>
+                <linearGradient id="overallTrend" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgb(var(--chart-1))" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="rgb(var(--chart-1))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />
+              <XAxis
+                dataKey="date"
+                stroke="rgb(var(--muted-foreground))"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={formatTick}
+                minTickGap={24}
+              />
+              <YAxis
+                stroke="rgb(var(--muted-foreground))"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, 100]}
+                width={32}
+              />
+              <Tooltip content={<ChartTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="overallScore"
+                name="Overall"
+                stroke="rgb(var(--chart-1))"
+                strokeWidth={2}
+                fill="url(#overallTrend)"
+                isAnimationActive={false}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Multi-line Comparison */}
-      <div className="p-6 bg-white border border-gray-200 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Score Comparison</h3>
-        <div className="space-y-4">
-          {/* Legend */}
-          <div className="flex flex-wrap gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-500 rounded"></div>
-              <span className="text-gray-700">Productivity</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-purple-500 rounded"></div>
-              <span className="text-gray-700">Wellness</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-orange-500 rounded"></div>
-              <span className="text-gray-700">Growth</span>
-            </div>
-          </div>
-
-          {/* Chart */}
-          <div className="relative h-64">
-            <svg className="w-full h-full" viewBox="0 0 800 200" preserveAspectRatio="none">
-              {/* Grid lines */}
-              {[0, 25, 50, 75, 100].map((value) => (
-                <g key={value}>
-                  <line
-                    x1="0"
-                    y1={200 - (value * 2)}
-                    x2="800"
-                    y2={200 - (value * 2)}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x="5"
-                    y={200 - (value * 2) - 5}
-                    fontSize="12"
-                    fill="#6b7280"
-                  >
-                    {value}
-                  </text>
-                </g>
+      <div className="bento-card p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-base font-semibold text-foreground">Score comparison</h3>
+        </div>
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData} margin={{ top: 8, right: 8, bottom: 8, left: -16 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />
+              <XAxis
+                dataKey="date"
+                stroke="rgb(var(--muted-foreground))"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={formatTick}
+                minTickGap={24}
+              />
+              <YAxis
+                stroke="rgb(var(--muted-foreground))"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, 100]}
+                width={32}
+              />
+              <Tooltip content={<ChartTooltip />} />
+              <Legend
+                verticalAlign="top"
+                height={32}
+                iconType="plainline"
+                wrapperStyle={{ fontSize: 12, color: 'rgb(var(--muted-foreground))' }}
+              />
+              {series.map((s) => (
+                <Line
+                  key={s.key}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.name}
+                  stroke={s.color}
+                  strokeWidth={2}
+                  strokeDasharray={s.dash}
+                  dot={false}
+                  activeDot={{ r: 4, strokeWidth: 0 }}
+                  isAnimationActive={false}
+                />
               ))}
-
-              {/* Productivity line */}
-              <polyline
-                points={data.map((point, index) => {
-                  const x = (index / (data.length - 1)) * 800
-                  const y = 200 - (point.productivityScore * 2)
-                  return `${x},${y}`
-                }).join(' ')}
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="2"
-              />
-
-              {/* Wellness line */}
-              <polyline
-                points={data.map((point, index) => {
-                  const x = (index / (data.length - 1)) * 800
-                  const y = 200 - (point.wellnessScore * 2)
-                  return `${x},${y}`
-                }).join(' ')}
-                fill="none"
-                stroke="#a855f7"
-                strokeWidth="2"
-              />
-
-              {/* Growth line */}
-              <polyline
-                points={data.map((point, index) => {
-                  const x = (index / (data.length - 1)) * 800
-                  const y = 200 - (point.growthScore * 2)
-                  return `${x},${y}`
-                }).join(' ')}
-                fill="none"
-                stroke="#f97316"
-                strokeWidth="2"
-              />
-            </svg>
-          </div>
-
-          {/* Date labels */}
-          <div className="flex justify-between text-xs text-gray-500">
-            <span>{formatDate(data[0].date)}</span>
-            <span>{formatDate(data[Math.floor(data.length / 2)].date)}</span>
-            <span>{formatDate(data[data.length - 1].date)}</span>
-          </div>
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ChartTooltip({ active, payload, label }: {
+  active?: boolean
+  payload?: Array<{ name?: string; value?: number; color?: string }>
+  label?: string | Date
+}) {
+  if (!active || !payload?.length) return null
+  const dateLabel = label ? new Date(label).toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  }) : ''
+  return (
+    <div className="rounded-lg border border-border bg-popover px-3 py-2 text-xs shadow-md">
+      <p className="mb-1 font-medium text-foreground">{dateLabel}</p>
+      <ul className="space-y-1">
+        {payload.map((p, i) => (
+          <li key={i} className="flex items-center justify-between gap-3 text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span
+                aria-hidden="true"
+                className="inline-block h-2 w-2 rounded-full"
+                style={{ background: p.color }}
+              />
+              {p.name}
+            </span>
+            <span className="font-mono tabular-nums text-foreground" data-numeric>
+              {Math.round(p.value ?? 0)}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

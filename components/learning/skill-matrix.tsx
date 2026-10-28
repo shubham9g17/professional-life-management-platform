@@ -58,7 +58,7 @@ export function SkillMatrix({ resources }: SkillMatrixProps) {
 
   if (categories.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         <p>No learning data available yet.</p>
         <p className="text-sm mt-2">Start adding resources to see your skill matrix!</p>
       </div>
@@ -77,7 +77,7 @@ export function SkillMatrix({ resources }: SkillMatrixProps) {
           return (
             <div
               key={category}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className="border rounded-lg p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
@@ -88,21 +88,21 @@ export function SkillMatrix({ resources }: SkillMatrixProps) {
                     >
                       {proficiency.level}
                     </span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                       {data.avgCompletion}% proficiency
                     </span>
                   </div>
                 </div>
 
-                <div className="text-right text-sm text-gray-600">
+                <div className="text-right text-sm text-muted-foreground">
                   <div>{data.total} resources</div>
-                  <div className="text-green-600">{data.completed} completed</div>
-                  <div className="text-blue-600">{data.inProgress} in progress</div>
+                  <div className="text-green-600 dark:text-green-400">{data.completed} completed</div>
+                  <div className="text-blue-600 dark:text-blue-400">{data.inProgress} in progress</div>
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-3">
                 <div
                   className={`h-3 rounded-full transition-all ${proficiency.color}`}
                   style={{ width: `${data.avgCompletion}%` }}
@@ -119,7 +119,7 @@ export function SkillMatrix({ resources }: SkillMatrixProps) {
                 ).map(([type, count]) => (
                   <span
                     key={type}
-                    className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded"
+                    className="text-xs px-2 py-1 bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded"
                   >
                     {count as number} {type.toLowerCase()}
                     {(count as number) !== 1 ? 's' : ''}

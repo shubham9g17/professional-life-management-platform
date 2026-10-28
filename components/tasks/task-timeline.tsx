@@ -26,17 +26,17 @@ interface TaskTimelineProps {
 }
 
 const priorityColors = {
-  LOW: 'bg-gray-400',
-  MEDIUM: 'bg-blue-400',
-  HIGH: 'bg-orange-400',
-  URGENT: 'bg-red-400',
+  LOW: 'bg-gray-400 dark:bg-gray-500',
+  MEDIUM: 'bg-blue-400 dark:bg-blue-500',
+  HIGH: 'bg-orange-400 dark:bg-orange-500',
+  URGENT: 'bg-red-400 dark:bg-red-500',
 }
 
 const statusColors = {
-  TODO: 'border-gray-300',
-  IN_PROGRESS: 'border-blue-400',
-  COMPLETED: 'border-green-400',
-  ARCHIVED: 'border-gray-200',
+  TODO: 'border-l-gray-300 dark:border-l-gray-600',
+  IN_PROGRESS: 'border-l-blue-400 dark:border-l-blue-500',
+  COMPLETED: 'border-l-green-400 dark:border-l-green-500',
+  ARCHIVED: 'border-l-gray-200 dark:border-l-gray-700',
 }
 
 export function TaskTimeline({ tasks, onTaskClick, onCreateNew }: TaskTimelineProps) {
@@ -86,8 +86,8 @@ export function TaskTimeline({ tasks, onTaskClick, onCreateNew }: TaskTimelinePr
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Task Timeline</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Task Timeline</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             {tasks.filter(t => t.dueDate).length} tasks with due dates
           </p>
         </div>
@@ -100,8 +100,8 @@ export function TaskTimeline({ tasks, onTaskClick, onCreateNew }: TaskTimelinePr
 
       {/* Timeline */}
       {tasksByDate.length === 0 ? (
-        <div className="text-center py-12 bg-white border rounded-lg">
-          <p className="text-gray-500 text-lg">No tasks with due dates</p>
+        <div className="bento-card text-center py-12">
+          <p className="text-muted-foreground text-lg">No tasks with due dates</p>
           {onCreateNew && (
             <Button onClick={onCreateNew} className="mt-4">
               Create a Task
@@ -126,14 +126,14 @@ export function TaskTimeline({ tasks, onTaskClick, onCreateNew }: TaskTimelinePr
                     )}
                   />
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-foreground">
                       {dateKey}
                     </h3>
                     {overdue && (
-                      <span className="text-sm text-red-600 font-medium">Overdue</span>
+                      <span className="text-sm text-red-600 dark:text-red-400 font-medium">Overdue</span>
                     )}
                     {dueSoon && (
-                      <span className="text-sm text-yellow-600 font-medium">Due Soon</span>
+                      <span className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">Due Soon</span>
                     )}
                   </div>
                 </div>
@@ -145,7 +145,7 @@ export function TaskTimeline({ tasks, onTaskClick, onCreateNew }: TaskTimelinePr
                       key={task.id}
                       onClick={() => onTaskClick?.(task)}
                       className={cn(
-                        'w-full text-left bg-white border-l-4 rounded-lg p-4 shadow-sm hover:shadow-md transition-all',
+                        'w-full text-left bg-card border border-border border-l-4 rounded-lg p-4 shadow-sm hover:shadow-md transition-all',
                         statusColors[task.status as keyof typeof statusColors]
                       )}
                     >
@@ -158,31 +158,31 @@ export function TaskTimeline({ tasks, onTaskClick, onCreateNew }: TaskTimelinePr
                                 priorityColors[task.priority as keyof typeof priorityColors]
                               )}
                             />
-                            <span className="text-xs text-gray-500 uppercase">
+                            <span className="text-xs text-muted-foreground uppercase">
                               {task.workspace}
                             </span>
-                            <span className="text-xs text-gray-500">•</span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground">
                               {task.priority}
                             </span>
                           </div>
 
-                          <h4 className="font-semibold text-gray-900 mb-1">
+                          <h4 className="font-semibold text-foreground mb-1">
                             {task.title}
                           </h4>
 
                           {task.description && (
-                            <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                               {task.description}
                             </p>
                           )}
 
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
                             <span className={cn(
                               'px-2 py-1 rounded',
-                              task.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                              task.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                              'bg-gray-100 text-gray-800'
+                              task.status === 'COMPLETED' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' :
+                              task.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' :
+                              'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
                             )}>
                               {task.status.replace('_', ' ')}
                             </span>
@@ -195,7 +195,7 @@ export function TaskTimeline({ tasks, onTaskClick, onCreateNew }: TaskTimelinePr
                           </div>
                         </div>
 
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-muted-foreground">
                           {new Date(task.dueDate!).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit'
@@ -208,7 +208,7 @@ export function TaskTimeline({ tasks, onTaskClick, onCreateNew }: TaskTimelinePr
 
                 {/* Connecting line to next date */}
                 {tasksByDate.indexOf([dateKey, dateTasks]) < tasksByDate.length - 1 && (
-                  <div className="absolute left-[5px] top-12 bottom-0 w-0.5 bg-gray-200" />
+                  <div className="absolute left-[5px] top-12 bottom-0 w-0.5 bg-border" />
                 )}
               </div>
             )

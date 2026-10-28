@@ -59,7 +59,7 @@ export function ProgressTracker({
   }
 
   return (
-    <div className="space-y-4 p-4 border border-gray-200 rounded-lg">
+    <div className="space-y-4 p-4 border rounded-lg">
       <h3 className="font-semibold text-lg">Update Progress</h3>
 
       <div className="space-y-2">
@@ -74,7 +74,7 @@ export function ProgressTracker({
             onChange={(e) => setProgress(parseInt(e.target.value) || 0)}
             className="w-24"
           />
-          <span className="text-sm text-gray-600">%</span>
+          <span className="text-sm text-muted-foreground">%</span>
           <input
             type="range"
             min="0"
@@ -84,7 +84,7 @@ export function ProgressTracker({
             className="flex-1"
           />
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
           <div
             className="bg-blue-600 h-2 rounded-full transition-all"
             style={{ width: `${progress}%` }}
@@ -94,7 +94,7 @@ export function ProgressTracker({
 
       <div className="space-y-2">
         <Label>Time Invested</Label>
-        <div className="text-sm text-gray-600 mb-2">
+        <div className="text-sm text-muted-foreground mb-2">
           Total: {formatTime(currentTimeInvested + timeToAdd)}
         </div>
 
@@ -145,7 +145,7 @@ export function ProgressTracker({
         </div>
       </div>
 
-      {error && <div className="text-red-600 text-sm">{error}</div>}
+      {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
 
       <Button onClick={handleUpdate} disabled={isUpdating} className="w-full">
         {isUpdating ? 'Updating...' : 'Update Progress'}

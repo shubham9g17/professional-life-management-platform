@@ -1,19 +1,42 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Skeleton } from '@/components/ui/skeleton'
 import { FitnessDashboard } from '@/components/fitness/fitness-dashboard'
 import { ExerciseLog } from '@/components/fitness/exercise-log'
+import { ExerciseForm, type ExerciseFormData } from '@/components/fitness/exercise-form'
 import { FitnessGoals } from '@/components/fitness/fitness-goals'
 import { HealthMetricsForm } from '@/components/fitness/health-metrics-form'
+import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
+
+function mode<T>(values: Array<T | null | undefined>): T | null {
+  const counts = new Map<T, number>()
+  for (const v of values) {
+    if (v == null) continue
+    counts.set(v, (counts.get(v) ?? 0) + 1)
+  }
+  let best: T | null = null
+  let bestCount = 0
+  for (const [v, c] of counts) {
+    if (c > bestCount) {
+      best = v
+      bestCount = c
+    }
+  }
+  return best
+}
 
 export default function FitnessPage() {
   const [exercises, setExercises] = useState<any[]>([])
   const [goals, setGoals] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [showExerciseForm, setShowExerciseForm] = useState(false)
   const { toast } = useToast()
+  const reduce = useReducedMotion()
 
   useEffect(() => {
     fetchData()
@@ -28,17 +51,17 @@ export default function FitnessPage() {
 
       if (exercisesRes.ok) {
         const data = await exercisesRes.json()
-        setExercises(data.exercises || [])
-        
-        // Calculate stats
-        const totalMinutes = data.exercises?.reduce((sum: number, e: any) => sum + e.duration, 0) || 0
-        const totalCalories = data.exercises?.reduce((sum: number, e: any) => sum + (e.caloriesBurned || 0), 0) || 0
+        const exercises = data.exercises || []
+        setExercises(exercises)
+
+        const totalMinutes = exercises.reduce((sum: number, e: any) => sum + e.duration, 0)
+        const totalCalories = exercises.reduce((sum: number, e: any) => sum + (e.caloriesBurned || 0), 0)
         setStats({
-          totalExercises: data.exercises?.length || 0,
+          totalExercises: exercises.length,
           totalMinutes,
           totalCalories,
-          averageIntensity: 'MODERATE',
-          mostCommonActivity: 'Running',
+          averageIntensity: mode(exercises.map((e: any) => e.intensity)),
+          mostCommonActivity: mode(exercises.map((e: any) => e.activityType)),
           weeklyMinutes: totalMinutes,
           monthlyMinutes: totalMinutes,
         })
@@ -58,6 +81,26 @@ export default function FitnessPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleCreateExercise = async (data: ExerciseFormData) => {
+    const response = await fetch('/api/exercises', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error || 'Failed to log exercise')
+    }
+
+    setShowExerciseForm(false)
+    await fetchData()
+    toast({
+      title: 'Exercise logged',
+      description: `${data.activityType} · ${data.duration} min`,
+    })
   }
 
   const handleDeleteExercise = async (exerciseId: string) => {
@@ -158,14 +201,30 @@ export default function FitnessPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading fitness data...</div>
+      <div className="space-y-6">
+        <Skeleton className="h-9 w-40" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-[var(--card-radius)]" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y: 6 }}
+      animate={reduce ? undefined : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Fitness</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Track exercise, goals, and health metrics
+        </p>
+      </div>
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -178,7 +237,26 @@ export default function FitnessPage() {
           {stats && <FitnessDashboard stats={stats} />}
         </TabsContent>
 
-        <TabsContent value="exercises" className="mt-6">
+        <TabsContent value="exercises" className="mt-6 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {exercises.length} exercise{exercises.length === 1 ? '' : 's'} logged
+            </p>
+            <Button
+              onClick={() => setShowExerciseForm((s) => !s)}
+              variant={showExerciseForm ? 'outline' : 'default'}
+            >
+              {showExerciseForm ? 'Cancel' : '+ Log Exercise'}
+            </Button>
+          </div>
+
+          {showExerciseForm && (
+            <div className="bento-card p-6">
+              <h2 className="mb-4 text-lg font-semibold text-foreground">Log new exercise</h2>
+              <ExerciseForm onSubmit={handleCreateExercise} />
+            </div>
+          )}
+
           <ExerciseLog
             exercises={exercises}
             onDelete={handleDeleteExercise}
@@ -197,6 +275,6 @@ export default function FitnessPage() {
           <HealthMetricsForm onSubmit={handleMetricsSubmit} />
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   )
 }

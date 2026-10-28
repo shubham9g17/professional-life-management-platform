@@ -13,16 +13,16 @@ interface MetricCardProps {
 
 export function MetricCard({ title, value, subtitle, trend, color = 'blue' }: MetricCardProps) {
   const colorClasses = {
-    blue: 'text-blue-600 bg-blue-50',
-    green: 'text-green-600 bg-green-50',
-    purple: 'text-purple-600 bg-purple-50',
-    orange: 'text-orange-600 bg-orange-50',
+    blue: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/30',
+    green: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30',
+    purple: 'text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-950/30',
+    orange: 'text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-950/30',
   }
 
   const trendColors = {
-    up: 'text-green-600',
-    down: 'text-red-600',
-    neutral: 'text-gray-600',
+    up: 'text-green-600 dark:text-green-400',
+    down: 'text-red-600 dark:text-red-400',
+    neutral: 'text-muted-foreground',
   }
 
   const trendIcons = {
@@ -32,15 +32,15 @@ export function MetricCard({ title, value, subtitle, trend, color = 'blue' }: Me
   }
 
   return (
-    <div className="p-6 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+    <div className="bento-card p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
-          <p className={`text-3xl font-bold ${colorClasses[color].split(' ')[0]}`}>
+          <p className="text-sm font-medium text-muted-foreground mb-2">{title}</p>
+          <p className={`text-3xl font-bold ${colorClasses[color].split(' ').filter((c) => c.includes('text-')).join(' ')}`}>
             {Math.round(value)}
           </p>
           {subtitle && (
-            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+            <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
           )}
         </div>
         <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
@@ -63,7 +63,7 @@ export function MetricCard({ title, value, subtitle, trend, color = 'blue' }: Me
         <div className={`mt-3 flex items-center text-sm ${trendColors[trend.direction]}`}>
           <span className="font-semibold mr-1">{trendIcons[trend.direction]}</span>
           <span className="font-medium">{Math.abs(trend.value).toFixed(1)}%</span>
-          <span className="text-gray-500 ml-1">vs last week</span>
+          <span className="text-muted-foreground ml-1">vs last week</span>
         </div>
       )}
     </div>

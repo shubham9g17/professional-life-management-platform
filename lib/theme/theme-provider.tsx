@@ -46,12 +46,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme])
 
-  // Apply theme to document
+  // Apply theme to document. Set data-theme-transition briefly so the
+  // smooth color transition only fires on intentional theme toggles, not
+  // on every hover/focus interaction across the app.
+  const isFirstApply = React.useRef(true)
   React.useEffect(() => {
     const root = document.documentElement
+    if (!isFirstApply.current) {
+      root.setAttribute('data-theme-transition', '')
+    }
     root.classList.remove('light', 'dark')
     root.classList.add(resolvedTheme)
     root.setAttribute('data-theme', resolvedTheme)
+    if (!isFirstApply.current) {
+      const t = window.setTimeout(() => {
+        root.removeAttribute('data-theme-transition')
+      }, 250)
+      return () => window.clearTimeout(t)
+    }
+    isFirstApply.current = false
   }, [resolvedTheme])
 
   const setTheme = React.useCallback((newTheme: Theme) => {

@@ -122,7 +122,7 @@ export function HealthMetricsForm({ onSubmit, initialData }: HealthMetricsFormPr
           }
           placeholder="1 = Poor, 10 = Excellent"
         />
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-xs text-muted-foreground">
           <span>Poor</span>
           <span>Excellent</span>
         </div>
@@ -144,7 +144,7 @@ export function HealthMetricsForm({ onSubmit, initialData }: HealthMetricsFormPr
           }
           placeholder="1 = Low, 10 = High"
         />
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-xs text-muted-foreground">
           <span>Low</span>
           <span>High</span>
         </div>
@@ -166,7 +166,7 @@ export function HealthMetricsForm({ onSubmit, initialData }: HealthMetricsFormPr
           }
           placeholder="1 = Low, 10 = High"
         />
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-xs text-muted-foreground">
           <span>Low</span>
           <span>High</span>
         </div>

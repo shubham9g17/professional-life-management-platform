@@ -1,190 +1,127 @@
-# Database Schema Documentation
+# Prisma / Database Documentation
 
 ## Overview
 
-This directory contains the Prisma schema and migrations for the Professional Life Management Platform. The database uses SQLite for easy development and deployment, designed to support comprehensive tracking of productivity, wellness, and professional development activities.
+The platform uses **Prisma over PostgreSQL** as the source of truth. The schema in `prisma/schema.prisma` defines 18 models, all owned by `User` with cascade-on-delete relations. `prisma.config.ts` loads `.env` via `dotenv/config` and pins the `classic` engine — always run via `npx prisma` so this config is picked up.
 
-## Schema Structure
+For a high-level walkthrough see [`../docs/DATABASE_SCHEMA.md`](../docs/DATABASE_SCHEMA.md).
 
-### Core Models
+## Project conventions
 
-#### User Model
-- Stores user authentication credentials and preferences
-- Includes notification preferences (quiet hours, frequency)
-- Tracks aggregate metrics (productivity, wellness, growth scores)
-- Theme and timezone preferences
+These conventions are enforced in code, not in the schema. Preserve them when adding fields:
 
-#### Task Management
-- **Task**: Tasks with workspace categorization (Professional, Personal, Learning)
-- Supports priority levels, due dates, and estimated effort
-- Soft delete capability with status tracking
+- **Enums are `String` columns** validated by Zod at the API boundary (no native Prisma enums). E.g. `Task.status` is `String` but Zod restricts it to `'TODO' | 'IN_PROGRESS' | 'COMPLETED' | 'ARCHIVED'`.
+- **Array fields are JSON-encoded strings.** `Task.tags` and `Meal.foodItems` are stored as `String @default("[]")` and `JSON.stringify`/`JSON.parse`'d at the API boundary.
+- **Repositories in `lib/repositories/*` are the only place that should call `prisma.*` directly.** API routes go through them so caching, soft-delete (e.g. `Task.status = 'ARCHIVED'`), and audit logging stay consistent.
+- **Prisma client is a global singleton** (`lib/prisma.ts`) to survive Next.js dev hot-reload. Don't `new PrismaClient()` elsewhere.
 
-#### Habit Tracking
-- **Habit**: Habit definitions with categories and frequency
-- **HabitCompletion**: Individual completion records
-- Automatic streak calculation and completion rate tracking
+## Schema models
 
-#### Financial Tracking
-- **Transaction**: Income and expense tracking with categories
-- **Budget**: Monthly budget limits with alert thresholds
-- Support for custom categories and subcategories
+### Core
+- **User** — auth credentials, notification preferences, theme, timezone, aggregate scores
 
-#### Fitness & Health
-- **Exercise**: Activity logging with duration and intensity
-- **HealthMetric**: Daily health metrics (weight, sleep, stress, energy)
+### Productivity
+- **Task** — workspace (Professional/Personal/Learning), priority, status, due date, tags. Soft-deleted on DELETE (`status = 'ARCHIVED'`).
+- **Habit** + **HabitCompletion** — streak + completion-rate tracking; `HabitCompletion` rows written by `POST /api/habits/[id]/complete`.
 
-#### Nutrition
-- **Meal**: Meal logging with optional macro tracking
-- **WaterIntake**: Hydration tracking
+### Finance
+- **Transaction** — INCOME/EXPENSE, category + subcategory, tags
+- **Budget** — monthly limit + alert threshold; `(userId, category)` composite-unique → POST returns 409 on duplicate
 
-#### Learning & Development
-- **LearningResource**: Books, courses, certifications, articles
-- Progress tracking with completion percentage and time invested
+### Fitness/Health
+- **Exercise** — activityType, duration, intensity (LOW/MODERATE/HIGH/INTENSE)
+- **HealthMetric** — daily upsert (weight, sleep, stress, energy 1-10)
+- **FitnessGoal** — goalType, targetValue, currentValue, status (ACTIVE/COMPLETED/ABANDONED)
 
-#### Analytics
-- **DailyMetrics**: Aggregated daily performance metrics
-- **Achievement**: Milestone tracking across all categories
+### Nutrition
+- **Meal** — mealType, foodItems[], optional macros
+- **WaterIntake** — amount in ml; no PATCH endpoint (delete + re-create instead)
 
-#### System Features
-- **Notification**: User notifications with read status
-- **SyncQueue**: Offline operation queue for sync
-- **ConflictResolution**: Conflict resolution for offline sync
+### Learning
+- **LearningResource** — type (BOOK/COURSE/CERTIFICATION/ARTICLE), completionPercentage, timeInvested. Reaching 100% auto-sets `completedAt`; `timeInvested` updates are additive at the route layer.
 
-## Database Indexes
+### Analytics
+- **DailyMetrics** — daily aggregate; written by `POST /api/tasks/[id]/complete` and the `/api/cron/metrics-aggregation` job.
+- **Achievement** — milestone records; written by the analytics service.
 
-The schema includes comprehensive indexes for optimal query performance:
+### System
+- **Notification** — read flag, flexible JSON `data` field
+- **SyncQueue** + **ConflictResolution** — offline reconciliation (server side of the IndexedDB queue in `lib/offline/`)
+- **Integration** — third-party connectors (Google Calendar, Notion, etc.); OAuth state in encrypted columns
 
-- **User indexes**: email lookup
-- **Task indexes**: userId, status, workspace, dueDate, composite indexes
-- **Habit indexes**: userId, category, composite indexes
-- **Transaction indexes**: userId, type, category, date, composite indexes
-- **Exercise indexes**: userId, date, activityType
-- **Meal indexes**: userId, date, mealType
-- **Notification indexes**: userId, read status, createdAt
-- **SyncQueue indexes**: userId, synced status, timestamp
+## Indexes
 
-## Running Migrations
+Composite indexes target the most common query shapes:
+- `Task` — userId, status, workspace, dueDate; composite `(userId, status)`
+- `Habit` — userId, category
+- `Transaction` — userId, type, category, date; composite `(userId, date)`
+- `Exercise`, `Meal` — userId, date
+- `Notification` — userId, read, createdAt
+- `SyncQueue` — userId, synced, timestamp
 
-### Prerequisites
+## Unique constraints
 
-1. No database server required - SQLite is file-based!
-2. Configure DATABASE_URL in `.env` file:
-   ```
-   DATABASE_URL="file:./dev.db"
-   ```
+| Constraint | Purpose |
+|---|---|
+| `User.email` (unique) | Identity |
+| `Budget (userId, category)` (composite) | One budget per category per user (POST returns 409 on duplicate) |
+| `HealthMetric (userId, date)` (composite) | Daily upsert key |
+| `DailyMetrics (userId, date)` (composite) | Daily aggregate key |
 
-### Generate Prisma Client
+> **Known schema bug:** `DailyMetrics` currently *also* declares `date @unique` on the field, in addition to the composite. That allows only one user platform-wide to own a row per date, breaking `POST /api/tasks/[id]/complete` for every user except the first. Fix: drop the field-level `@unique`, run `npx prisma migrate dev --name fix_dailymetrics_unique`. See [`../docs/TROUBLESHOOTING.md#known-issues`](../docs/TROUBLESHOOTING.md#known-issues).
+
+## Common commands
 
 ```bash
+# Generate Prisma client (run after schema edits)
 npx prisma generate
-```
 
-### Apply Migrations
+# Create + apply a migration in dev
+npx prisma migrate dev --name <descriptive_name>
 
-```bash
-# Apply all pending migrations
+# Apply pending migrations in prod / CI
 npx prisma migrate deploy
 
-# Or for development (creates migration if schema changed)
-npx prisma migrate dev
-```
+# Visual data browser
+npx prisma studio
 
-### Reset Database (Development Only)
+# Validate schema without applying
+npx prisma validate
 
-```bash
+# Reset DB (⚠️ deletes all data)
 npx prisma migrate reset
 ```
 
-This will:
-1. Drop the database
-2. Create a new database
-3. Apply all migrations
-4. Run seed script (if configured)
+## DATABASE_URL
 
-## Prisma Studio
+The datasource is `postgresql`. Configure in `.env`:
 
-To explore and edit data visually:
-
-```bash
-npx prisma studio
+```env
+DATABASE_URL="postgresql://user:password@host:5432/dbname"
+# Add ?sslmode=require for managed Postgres providers.
 ```
 
-This opens a web interface at http://localhost:5555
+## Cascade deletes
 
-## Schema Validation
+Every owned model relates to `User` via `onDelete: Cascade`. `DELETE /api/user/delete` (GDPR right-to-erasure) relies on this — see `lib/security/gdpr-compliance.ts`.
 
-To validate the schema without applying changes:
+## Migration discipline
 
-```bash
-npx prisma validate
-```
-
-## Key Features
-
-### Cascade Deletes
-All relations use `onDelete: Cascade` to ensure data integrity when users are deleted.
-
-### Unique Constraints
-- User email must be unique
-- Budget per category per user must be unique
-- HealthMetric per date per user must be unique
-- DailyMetrics per date per user must be unique
-
-### Default Values
-- Timestamps (createdAt, updatedAt) are automatically managed
-- Boolean flags default to sensible values
-- Numeric scores default to 0
-- Notification preferences default to enabled
-
-### JSON Fields
-- Notification data (flexible additional data)
-- SyncQueue data (operation payload)
-- ConflictResolution versions (local, server, resolved)
-
-## Performance Considerations
-
-1. **Composite Indexes**: Frequently queried combinations (userId + date, userId + status) have composite indexes
-2. **JSON Fields**: Tags and arrays stored as JSON strings for SQLite compatibility
-3. **Timestamps**: All date fields are indexed for time-based queries
-4. **Foreign Keys**: All relations have proper foreign key constraints with cascade deletes
-
-## Migration History
-
-- `20251128161320_initial_schema`: Initial SQLite database schema with all models, indexes, and relationships
+1. **Never edit migration files manually** after they've been applied.
+2. **Always `npx prisma generate`** after schema changes so the typed client matches.
+3. **Use `prisma.$transaction(...)`** for operations spanning multiple tables (see `app/api/tasks/[id]/complete/route.ts` for an example).
+4. **Test migrations against a snapshot** in staging before production.
+5. **Back up the database** before running migrations in production.
 
 ## Troubleshooting
 
-### Migration Fails
-If a migration fails:
-1. Verify DATABASE_URL is correct in .env file
-2. Check file permissions for the database directory
-3. Review migration SQL for conflicts
-4. Delete dev.db and run migrations again if needed
+- **Migration fails:** verify `DATABASE_URL`, check the migration SQL for column-rename conflicts, and confirm the live schema matches `_prisma_migrations` history.
+- **Schema drift in dev:** `npx prisma migrate dev` will detect drift and offer to reset. Avoid `npx prisma db push --accept-data-loss` in shared environments.
+- **Connection issues:** `npx prisma db execute --stdin <<< "SELECT 1"` confirms the URL is reachable.
 
-### Schema Drift
-If schema and database are out of sync:
-```bash
-npx prisma db push --accept-data-loss  # Development only!
-```
-
-### Connection Issues
-Test database connection:
-```bash
-npx prisma db execute --stdin <<< "SELECT 1"
-```
-
-## Best Practices
-
-1. **Never edit migration files manually** after they've been applied
-2. **Always generate Prisma Client** after schema changes
-3. **Use transactions** for operations that modify multiple tables
-4. **Test migrations** in development before applying to production
-5. **Backup database** before running migrations in production
-6. **Version control** all schema and migration files
-
-## Related Documentation
+## Related Docs
 
 - [Prisma Documentation](https://www.prisma.io/docs)
-- [SQLite Documentation](https://www.sqlite.org/docs.html)
-- Design Document: `../.kiro/specs/professional-life-management-platform/design.md`
-- Requirements: `../.kiro/specs/professional-life-management-platform/requirements.md`
+- [`../docs/DATABASE_SCHEMA.md`](../docs/DATABASE_SCHEMA.md) — high-level overview + ERD
+- [`../CLAUDE.md`](../CLAUDE.md) — schema conventions
+- [`../Features.md`](../Features.md) — which models back which features

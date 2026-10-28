@@ -106,7 +106,7 @@ export function NutritionCharts() {
   return (
     <div className="space-y-6">
       {/* Meals per Day Chart */}
-      <div className="bg-white border rounded-lg p-6">
+      <div className="bento-card p-6">
         <h3 className="text-lg font-semibold mb-4">Meals per Day (Last 7 Days)</h3>
         <div className="space-y-2">
           {last7Days.map((dateKey) => {
@@ -116,13 +116,13 @@ export function NutritionCharts() {
 
             return (
               <div key={dateKey} className="flex items-center gap-3">
-                <span className="text-sm text-gray-600 w-24">
+                <span className="text-sm text-muted-foreground w-24">
                   {new Date(dateKey).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                   })}
                 </span>
-                <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                <div className="flex-1 bg-muted rounded-full h-6 overflow-hidden">
                   <div
                     className="bg-green-500 h-full flex items-center justify-end pr-2"
                     style={{ width: `${percentage}%` }}
@@ -139,7 +139,7 @@ export function NutritionCharts() {
       </div>
 
       {/* Water Intake Chart */}
-      <div className="bg-white border rounded-lg p-6">
+      <div className="bento-card p-6">
         <h3 className="text-lg font-semibold mb-4">Water Intake (Last 7 Days)</h3>
         <div className="space-y-2">
           {last7Days.map((dateKey) => {
@@ -149,13 +149,13 @@ export function NutritionCharts() {
 
             return (
               <div key={dateKey} className="flex items-center gap-3">
-                <span className="text-sm text-gray-600 w-24">
+                <span className="text-sm text-muted-foreground w-24">
                   {new Date(dateKey).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                   })}
                 </span>
-                <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                <div className="flex-1 bg-muted rounded-full h-6 overflow-hidden">
                   <div
                     className={`h-full flex items-center justify-end pr-2 ${
                       amount >= goal ? 'bg-blue-500' : 'bg-blue-300'
@@ -173,12 +173,12 @@ export function NutritionCharts() {
             )
           })}
         </div>
-        <p className="text-xs text-gray-500 mt-3">Daily goal: 2000 ml</p>
+        <p className="text-xs text-muted-foreground mt-3">Daily goal: 2000 ml</p>
       </div>
 
       {/* Calories Chart */}
       {Object.keys(caloriesByDay).length > 0 && (
-        <div className="bg-white border rounded-lg p-6">
+        <div className="bento-card p-6">
           <h3 className="text-lg font-semibold mb-4">Calories per Day (Last 7 Days)</h3>
           <div className="space-y-2">
             {last7Days.map((dateKey) => {
@@ -188,13 +188,13 @@ export function NutritionCharts() {
 
               return (
                 <div key={dateKey} className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600 w-24">
+                  <span className="text-sm text-muted-foreground w-24">
                     {new Date(dateKey).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                     })}
                   </span>
-                  <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                  <div className="flex-1 bg-muted rounded-full h-6 overflow-hidden">
                     <div
                       className="bg-orange-500 h-full flex items-center justify-end pr-2"
                       style={{ width: `${percentage}%` }}

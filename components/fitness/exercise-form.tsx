@@ -85,7 +85,7 @@ export function ExerciseForm({ onSubmit, initialData, isEditing = false }: Exerc
           id="activityType"
           value={formData.activityType}
           onChange={(e) => setFormData({ ...formData, activityType: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
           required
         >
           <option value="">Select activity</option>
@@ -120,7 +120,7 @@ export function ExerciseForm({ onSubmit, initialData, isEditing = false }: Exerc
               intensity: e.target.value as ExerciseFormData['intensity'],
             })
           }
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
           required
         >
           {intensityLevels.map((level) => (
@@ -164,7 +164,7 @@ export function ExerciseForm({ onSubmit, initialData, isEditing = false }: Exerc
           id="notes"
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+          className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
           placeholder="Add any notes about your workout..."
         />
       </div>

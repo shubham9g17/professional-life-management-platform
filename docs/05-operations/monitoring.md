@@ -293,7 +293,7 @@ Set up alerts for:
 The platform includes a health check endpoint at `/health`:
 
 ```bash
-curl https://your-domain.com/health
+curl https://your-domain.com/api/health
 ```
 
 Response:
@@ -326,7 +326,7 @@ Response:
 1. Sign up at [uptimerobot.com](https://uptimerobot.com)
 2. Create a new monitor:
    - Monitor Type: HTTP(s)
-   - URL: `https://your-domain.com/health`
+   - URL: `https://your-domain.com/api/health`
    - Monitoring Interval: 5 minutes
    - Alert Contacts: Your email/SMS
 
@@ -339,7 +339,7 @@ Response:
 1. Sign up at [pingdom.com](https://pingdom.com)
 2. Create uptime check:
    - Name: Professional Life Platform
-   - URL: `https://your-domain.com/health`
+   - URL: `https://your-domain.com/api/health`
    - Check interval: 1 minute
    - Response time threshold: 2000ms
 

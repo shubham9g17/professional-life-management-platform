@@ -58,14 +58,13 @@ export class NotificationRepository {
    * Mark notification as read
    */
   async markAsRead(notificationId: string, userId: string): Promise<Notification | null> {
+    const existing = await prisma.notification.findFirst({
+      where: { id: notificationId, userId },
+    })
+    if (!existing) return null
     return prisma.notification.update({
-      where: {
-        id: notificationId,
-        userId, // Ensure user owns the notification
-      },
-      data: {
-        read: true,
-      },
+      where: { id: notificationId },
+      data: { read: true },
     })
   }
 

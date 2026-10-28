@@ -50,29 +50,29 @@ export function HabitProgress({ habit }: HabitProgressProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{habit.name}</h3>
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           Last 30 Days
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="bg-blue-50 p-3 rounded-lg text-center">
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg text-center">
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             {habit.currentStreak}
           </div>
-          <div className="text-xs text-gray-600">Current Streak</div>
+          <div className="text-xs text-muted-foreground">Current Streak</div>
         </div>
-        <div className="bg-green-50 p-3 rounded-lg text-center">
-          <div className="text-2xl font-bold text-green-600">
+        <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg text-center">
+          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
             {habit.longestStreak}
           </div>
-          <div className="text-xs text-gray-600">Best Streak</div>
+          <div className="text-xs text-muted-foreground">Best Streak</div>
         </div>
-        <div className="bg-purple-50 p-3 rounded-lg text-center">
-          <div className="text-2xl font-bold text-purple-600">
+        <div className="bg-purple-50 dark:bg-purple-950/30 p-3 rounded-lg text-center">
+          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
             {habit.completionRate.toFixed(0)}%
           </div>
-          <div className="text-xs text-gray-600">Completion Rate</div>
+          <div className="text-xs text-muted-foreground">Completion Rate</div>
         </div>
       </div>
 
@@ -80,16 +80,16 @@ export function HabitProgress({ habit }: HabitProgressProps) {
         {last30Days.map((date, index) => {
           const completed = isCompleted(date)
           const isToday = date.toDateString() === new Date().toDateString()
-          
+
           return (
             <div
               key={index}
               className={`aspect-square rounded ${
                 completed
-                  ? 'bg-green-500'
+                  ? 'bg-green-500 dark:bg-green-600'
                   : isToday
-                  ? 'bg-gray-300 border-2 border-blue-500'
-                  : 'bg-gray-200'
+                  ? 'bg-gray-300 dark:bg-gray-700 border-2 border-blue-500'
+                  : 'bg-gray-200 dark:bg-gray-800'
               }`}
               title={`${date.toLocaleDateString()} - ${
                 completed ? 'Completed' : 'Not completed'
@@ -99,7 +99,7 @@ export function HabitProgress({ habit }: HabitProgressProps) {
         })}
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>30 days ago</span>
         <span>Today</span>
       </div>
